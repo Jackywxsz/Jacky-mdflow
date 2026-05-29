@@ -381,7 +381,8 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
   private paginateGroup(title: string, nodes: Element[], settings: RedNoteSettings): RedNoteCard[] {
     const cards: RedNoteCard[] = [];
-    const maxWeight = settings.fontSize >= 18 ? 5 : settings.fontSize <= 14 ? 7 : 6;
+    const normalizedNodes = this.normalizePaginationNodes(nodes, settings);
+    const maxWeight = settings.fontSize >= 18 ? 3 : settings.fontSize <= 14 ? 5 : 4;
     let currentNodes: Element[] = [];
     let currentWeight = 0;
 
@@ -399,7 +400,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       currentWeight = 0;
     };
 
-    nodes.forEach((node) => {
+    normalizedNodes.forEach((node) => {
       const weight = this.getNodeWeight(node);
       if (currentNodes.length > 0 && currentWeight + weight > maxWeight) {
         flush();
@@ -411,6 +412,128 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     flush();
     return cards;
+  }
+
+  private normalizePaginationNodes(nodes: Element[], settings: RedNoteSettings): Element[] {
+    const maxChars = this.getMaxTextBlockChars(settings);
+
+    return nodes.flatMap((node) => {
+      const tag = node.tagName.toLowerCase();
+      if (!['p', 'blockquote'].includes(tag)) {
+        return [node];
+      }
+
+      const textLength = node.textContent?.trim().length || 0;
+      if (textLength <= maxChars) {
+        return [node];
+      }
+
+      return this.splitTextBlock(node, maxChars);
+    });
+  }
+
+  private getMaxTextBlockChars(settings: RedNoteSettings): number {
+    if (settings.fontSize >= 18) return 105;
+    if (settings.fontSize <= 14) return 170;
+    return 130;
+  }
+
+  private splitTextBlock(node: Element, maxChars: number): Element[] {
+    const textNodes = this.collectTextNodes(node);
+    const fullText = node.textContent || '';
+    if (textNodes.length === 0 || fullText.trim().length <= maxChars) {
+      return [node];
+    }
+
+    return this.getTextChunkRanges(fullText, maxChars)
+      .map(({ start, end }) => {
+        const range = node.ownerDocument.createRange();
+        const startPosition = this.resolveTextPosition(textNodes, start);
+        const endPosition = this.resolveTextPosition(textNodes, end);
+        const clone = node.cloneNode(false) as Element;
+
+        range.setStart(startPosition.node, startPosition.offset);
+        range.setEnd(endPosition.node, endPosition.offset);
+        clone.appendChild(range.cloneContents());
+        range.detach();
+
+        return clone;
+      })
+      .filter((clone) => Boolean(clone.textContent?.trim()));
+  }
+
+  private collectTextNodes(node: Element): Text[] {
+    const textNodes: Text[] = [];
+    const walker = node.ownerDocument.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+    let current = walker.nextNode();
+
+    while (current) {
+      textNodes.push(current as Text);
+      current = walker.nextNode();
+    }
+
+    return textNodes;
+  }
+
+  private getTextChunkRanges(text: string, maxChars: number): Array<{ start: number; end: number }> {
+    const ranges: Array<{ start: number; end: number }> = [];
+    let start = 0;
+
+    while (start < text.length) {
+      while (start < text.length && /\s/.test(text[start])) {
+        start += 1;
+      }
+
+      if (start >= text.length) break;
+
+      const hardEnd = Math.min(start + maxChars, text.length);
+      let end = hardEnd;
+
+      if (hardEnd < text.length) {
+        const slice = text.slice(start, hardEnd);
+        const breakIndex = this.findNaturalBreakIndex(slice, maxChars);
+        if (breakIndex > -1) {
+          end = start + breakIndex + 1;
+        }
+      }
+
+      ranges.push({ start, end });
+      start = end;
+    }
+
+    return ranges;
+  }
+
+  private findNaturalBreakIndex(text: string, maxChars: number): number {
+    const minBreakIndex = Math.floor(maxChars * 0.45);
+    const breakChars = ['。', '！', '？', '；', ';', '.', '!', '?', '，', ',', '、', ' '];
+
+    for (const breakChar of breakChars) {
+      const index = text.lastIndexOf(breakChar);
+      if (index >= minBreakIndex) {
+        return index;
+      }
+    }
+
+    return -1;
+  }
+
+  private resolveTextPosition(
+    textNodes: Text[],
+    absoluteOffset: number
+  ): { node: Text; offset: number } {
+    let cursor = 0;
+
+    for (const node of textNodes) {
+      const length = node.textContent?.length || 0;
+      if (absoluteOffset <= cursor + length) {
+        return { node, offset: Math.max(0, absoluteOffset - cursor) };
+      }
+      cursor += length;
+    }
+
+    const lastNode = textNodes[textNodes.length - 1];
+    return { node: lastNode, offset: lastNode.textContent?.length || 0 };
   }
 
   private getNodeWeight(node: Element): number {
