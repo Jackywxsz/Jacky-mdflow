@@ -442,7 +442,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   }
 
   private decorateContent(container: HTMLElement): void {
-    container.querySelectorAll('strong, em').forEach((element) => {
+    container.querySelectorAll('strong, em, mark').forEach((element) => {
       element.classList.add('red-emphasis');
     });
 
@@ -719,20 +719,60 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     await this.waitForImages(imagePreview);
     await this.rasterizeImagesForCapture(imagePreview);
 
-    const blob = await toBlob(imagePreview, {
-      cacheBust: true,
-      quality: 1,
-      pixelRatio: 4,
-      skipFonts: false,
-      imagePlaceholder: IMAGE_PLACEHOLDER,
-      backgroundColor: '#ffffff',
-    });
+    const originalBackground = imagePreview.style.background;
+    const originalBackgroundColor = imagePreview.style.backgroundColor;
+    const frameBackground = this.getFrameBackgroundForCapture(imagePreview);
+    const fallbackBackgroundColor = this.getFallbackBackgroundColor(frameBackground);
+
+    imagePreview.style.background = frameBackground;
+    imagePreview.style.backgroundColor = fallbackBackgroundColor;
+
+    let blob: Blob | null = null;
+    try {
+      blob = await toBlob(imagePreview, {
+        cacheBust: true,
+        quality: 1,
+        pixelRatio: 4,
+        skipFonts: false,
+        imagePlaceholder: IMAGE_PLACEHOLDER,
+        backgroundColor: fallbackBackgroundColor,
+      });
+    } finally {
+      imagePreview.style.background = originalBackground;
+      imagePreview.style.backgroundColor = originalBackgroundColor;
+    }
 
     if (!blob) {
       throw new Error('生成图片失败');
     }
 
     return blob;
+  }
+
+  private getFrameBackgroundForCapture(imagePreview: HTMLElement): string {
+    const inlineFrameBg = imagePreview.style.getPropertyValue('--rn-frame-bg').trim();
+    if (inlineFrameBg) return inlineFrameBg;
+
+    const computedStyle = window.getComputedStyle(imagePreview);
+    const computedBackground = computedStyle.backgroundImage && computedStyle.backgroundImage !== 'none'
+      ? computedStyle.backgroundImage
+      : computedStyle.backgroundColor;
+
+    return computedBackground || '#ffffff';
+  }
+
+  private getFallbackBackgroundColor(background: string): string {
+    const normalized = background.trim();
+    if (!normalized) return '#ffffff';
+    if (normalized.startsWith('#') || normalized.startsWith('rgb')) return normalized;
+
+    const firstHex = normalized.match(/#[0-9a-fA-F]{3,8}/)?.[0];
+    if (firstHex) return firstHex;
+
+    const firstRgb = normalized.match(/rgba?\([^)]+\)/)?.[0];
+    if (firstRgb) return firstRgb;
+
+    return '#ffffff';
   }
 
   private async waitForImages(root: HTMLElement): Promise<void> {

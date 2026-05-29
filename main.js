@@ -4961,7 +4961,7 @@ var RedNoteExporter = class {
     return container.innerHTML;
   }
   decorateContent(container) {
-    container.querySelectorAll("strong, em").forEach((element) => {
+    container.querySelectorAll("strong, em, mark").forEach((element) => {
       element.classList.add("red-emphasis");
     });
     container.querySelectorAll("a").forEach((element) => {
@@ -5182,18 +5182,53 @@ var RedNoteExporter = class {
   async capturePreview(imagePreview) {
     await this.waitForImages(imagePreview);
     await this.rasterizeImagesForCapture(imagePreview);
-    const blob = await toBlob(imagePreview, {
-      cacheBust: true,
-      quality: 1,
-      pixelRatio: 4,
-      skipFonts: false,
-      imagePlaceholder: IMAGE_PLACEHOLDER,
-      backgroundColor: "#ffffff"
-    });
+    const originalBackground = imagePreview.style.background;
+    const originalBackgroundColor = imagePreview.style.backgroundColor;
+    const frameBackground = this.getFrameBackgroundForCapture(imagePreview);
+    const fallbackBackgroundColor = this.getFallbackBackgroundColor(frameBackground);
+    imagePreview.style.background = frameBackground;
+    imagePreview.style.backgroundColor = fallbackBackgroundColor;
+    let blob = null;
+    try {
+      blob = await toBlob(imagePreview, {
+        cacheBust: true,
+        quality: 1,
+        pixelRatio: 4,
+        skipFonts: false,
+        imagePlaceholder: IMAGE_PLACEHOLDER,
+        backgroundColor: fallbackBackgroundColor
+      });
+    } finally {
+      imagePreview.style.background = originalBackground;
+      imagePreview.style.backgroundColor = originalBackgroundColor;
+    }
     if (!blob) {
       throw new Error("\u751F\u6210\u56FE\u7247\u5931\u8D25");
     }
     return blob;
+  }
+  getFrameBackgroundForCapture(imagePreview) {
+    const inlineFrameBg = imagePreview.style.getPropertyValue("--rn-frame-bg").trim();
+    if (inlineFrameBg)
+      return inlineFrameBg;
+    const computedStyle = window.getComputedStyle(imagePreview);
+    const computedBackground = computedStyle.backgroundImage && computedStyle.backgroundImage !== "none" ? computedStyle.backgroundImage : computedStyle.backgroundColor;
+    return computedBackground || "#ffffff";
+  }
+  getFallbackBackgroundColor(background) {
+    var _a, _b;
+    const normalized = background.trim();
+    if (!normalized)
+      return "#ffffff";
+    if (normalized.startsWith("#") || normalized.startsWith("rgb"))
+      return normalized;
+    const firstHex = (_a = normalized.match(/#[0-9a-fA-F]{3,8}/)) == null ? void 0 : _a[0];
+    if (firstHex)
+      return firstHex;
+    const firstRgb = (_b = normalized.match(/rgba?\([^)]+\)/)) == null ? void 0 : _b[0];
+    if (firstRgb)
+      return firstRgb;
+    return "#ffffff";
   }
   async waitForImages(root) {
     const images = Array.from(root.querySelectorAll("img"));
@@ -5342,6 +5377,46 @@ function createMinimalTemplate(id, name, description, overrides) {
     ...overrides
   });
 }
+function createDarkAccentTemplate(id, name, description, accent, accentRgb) {
+  return createMinimalTemplate(id, name, description, {
+    "--rn-frame-bg": "#000000",
+    "--rn-frame-border": `rgba(${accentRgb}, 0.34)`,
+    "--rn-frame-shadow": "0 28px 72px rgba(0, 0, 0, 0.34)",
+    "--rn-panel-bg": "rgba(0, 0, 0, 0.68)",
+    "--rn-header-badge-bg": `rgba(${accentRgb}, 0.12)`,
+    "--rn-header-badge-color": accent,
+    "--rn-avatar-bg": `linear-gradient(135deg, rgba(${accentRgb}, 0.24) 0%, rgba(${accentRgb}, 0.10) 100%)`,
+    "--rn-avatar-color": accent,
+    "--rn-name-color": "#ffffff",
+    "--rn-id-color": "rgba(255, 255, 255, 0.68)",
+    "--rn-time-color": "rgba(255, 255, 255, 0.52)",
+    "--rn-kicker-bg": `rgba(${accentRgb}, 0.12)`,
+    "--rn-kicker-color": accent,
+    "--rn-title-color": accent,
+    "--rn-body-color": "#ffffff",
+    "--rn-heading-color": accent,
+    "--rn-emphasis-color": accent,
+    "--rn-emphasis-bg": `rgba(${accentRgb}, 0.14)`,
+    "--rn-link-color": accent,
+    "--rn-link-border": `rgba(${accentRgb}, 0.68)`,
+    "--rn-quote-bg": "rgba(255, 255, 255, 0.06)",
+    "--rn-quote-border": `rgba(${accentRgb}, 0.28)`,
+    "--rn-code-bg": "rgba(255, 255, 255, 0.08)",
+    "--rn-code-color": accent,
+    "--rn-table-border": `rgba(${accentRgb}, 0.24)`,
+    "--rn-table-header-bg": `rgba(${accentRgb}, 0.10)`,
+    "--rn-footer-color": "rgba(255, 255, 255, 0.68)",
+    "--rn-footer-border": `rgba(${accentRgb}, 0.22)`,
+    "--rn-footer-bg": "rgba(0, 0, 0, 0.38)",
+    "--rn-cover-portrait-bg": "#000000",
+    "--rn-cover-content-bg": "rgba(0, 0, 0, 0.68)",
+    "--rn-cover-title-color": accent,
+    "--rn-cover-summary-color": "#ffffff",
+    "--rn-cover-line": accent,
+    "--rn-placeholder-bg": "rgba(255, 255, 255, 0.08)",
+    "--rn-placeholder-color": "#ffffff"
+  });
+}
 var baseMinimalVariables = {
   "--rn-frame-bg": "linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%)",
   "--rn-frame-border": "rgba(15, 23, 42, 0.08)",
@@ -5359,6 +5434,8 @@ var baseMinimalVariables = {
   "--rn-title-color": "#111827",
   "--rn-body-color": "#374151",
   "--rn-heading-color": "#111827",
+  "--rn-emphasis-color": "inherit",
+  "--rn-emphasis-bg": "transparent",
   "--rn-link-color": "#0f766e",
   "--rn-link-border": "rgba(15, 118, 110, 0.24)",
   "--rn-quote-bg": "#f8fafc",
@@ -5415,6 +5492,20 @@ var REDNOTE_TEMPLATE_PRESETS = {
       "--rn-link-border": "rgba(139, 94, 60, 0.18)",
       "--rn-footer-bg": "rgba(84, 76, 68, 0.03)"
     }
+  ),
+  "dark-orange": createDarkAccentTemplate(
+    "dark-orange",
+    "\u6697\u6A59\u98CE\u683C",
+    "\u9ED1\u5E95\u767D\u5B57\uFF0C\u6807\u9898\u548C\u91CD\u70B9\u4F7F\u7528 #f79300",
+    "#f79300",
+    "247, 147, 0"
+  ),
+  "neon-green": createDarkAccentTemplate(
+    "neon-green",
+    "\u4EAE\u7EFF\u98CE\u683C",
+    "\u53C2\u8003\u4EAE\u7EFF\u6807\u9898\u98CE\u683C\uFF0C\u9ED1\u5E95\u767D\u5B57",
+    "#00ff2a",
+    "0, 255, 42"
   ),
   minimal: createMinimalTemplate(
     "minimal",
@@ -5489,6 +5580,42 @@ var REDNOTE_TEMPLATE_PRESETS = {
       "--rn-footer-color": "rgba(2, 132, 199, 0.64)",
       "--rn-footer-border": "rgba(0, 180, 216, 0.14)",
       "--rn-footer-bg": "rgba(0, 180, 216, 0.03)"
+    }
+  ),
+  "cyber-orange": createMinimalTemplate(
+    "cyber-orange",
+    "\u51B7\u7070\u6A59\u8C03",
+    "\u6D45\u7070\u9ED1\u6E10\u53D8\uFF0C\u6DF1\u6A59\u6807\u9898",
+    {
+      "--rn-frame-bg": "linear-gradient(180deg, #eef0f3 0%, #dfe4ea 100%)",
+      "--rn-panel-bg": "#f5f6f8",
+      "--rn-frame-border": "rgba(15, 23, 42, 0.18)",
+      "--rn-frame-shadow": "0 22px 56px rgba(15, 23, 42, 0.13)",
+      "--rn-header-badge-bg": "rgba(201, 95, 0, 0.10)",
+      "--rn-header-badge-color": "#c95f00",
+      "--rn-avatar-bg": "linear-gradient(135deg, #dce2e9 0%, #cfd7e0 100%)",
+      "--rn-avatar-color": "#475569",
+      "--rn-name-color": "#0f172a",
+      "--rn-id-color": "rgba(11, 114, 133, 0.74)",
+      "--rn-time-color": "rgba(11, 114, 133, 0.52)",
+      "--rn-kicker-bg": "rgba(15, 23, 42, 0.06)",
+      "--rn-kicker-color": "#475569",
+      "--rn-title-color": "#c95f00",
+      "--rn-body-color": "#243041",
+      "--rn-heading-color": "#c95f00",
+      "--rn-emphasis-color": "#c95f00",
+      "--rn-emphasis-bg": "rgba(201, 95, 0, 0.10)",
+      "--rn-link-color": "#c95f00",
+      "--rn-link-border": "rgba(201, 95, 0, 0.24)",
+      "--rn-quote-bg": "#e8edf2",
+      "--rn-quote-border": "rgba(15, 23, 42, 0.14)",
+      "--rn-code-bg": "#e4e9ef",
+      "--rn-code-color": "#c95f00",
+      "--rn-table-border": "rgba(15, 23, 42, 0.16)",
+      "--rn-table-header-bg": "rgba(15, 23, 42, 0.07)",
+      "--rn-footer-color": "rgba(51, 65, 85, 0.66)",
+      "--rn-footer-border": "rgba(15, 23, 42, 0.14)",
+      "--rn-footer-bg": "rgba(15, 23, 42, 0.05)"
     }
   ),
   warm: createMinimalTemplate(

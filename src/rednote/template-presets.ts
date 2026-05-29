@@ -22,6 +22,53 @@ function createMinimalTemplate(
   });
 }
 
+function createDarkAccentTemplate(
+  id: string,
+  name: string,
+  description: string,
+  accent: string,
+  accentRgb: string
+): RedNoteTemplatePreset {
+  return createMinimalTemplate(id, name, description, {
+    '--rn-frame-bg': '#000000',
+    '--rn-frame-border': `rgba(${accentRgb}, 0.34)`,
+    '--rn-frame-shadow': '0 28px 72px rgba(0, 0, 0, 0.34)',
+    '--rn-panel-bg': 'rgba(0, 0, 0, 0.68)',
+    '--rn-header-badge-bg': `rgba(${accentRgb}, 0.12)`,
+    '--rn-header-badge-color': accent,
+    '--rn-avatar-bg': `linear-gradient(135deg, rgba(${accentRgb}, 0.24) 0%, rgba(${accentRgb}, 0.10) 100%)`,
+    '--rn-avatar-color': accent,
+    '--rn-name-color': '#ffffff',
+    '--rn-id-color': 'rgba(255, 255, 255, 0.68)',
+    '--rn-time-color': 'rgba(255, 255, 255, 0.52)',
+    '--rn-kicker-bg': `rgba(${accentRgb}, 0.12)`,
+    '--rn-kicker-color': accent,
+    '--rn-title-color': accent,
+    '--rn-body-color': '#ffffff',
+    '--rn-heading-color': accent,
+    '--rn-emphasis-color': accent,
+    '--rn-emphasis-bg': `rgba(${accentRgb}, 0.14)`,
+    '--rn-link-color': accent,
+    '--rn-link-border': `rgba(${accentRgb}, 0.68)`,
+    '--rn-quote-bg': 'rgba(255, 255, 255, 0.06)',
+    '--rn-quote-border': `rgba(${accentRgb}, 0.28)`,
+    '--rn-code-bg': 'rgba(255, 255, 255, 0.08)',
+    '--rn-code-color': accent,
+    '--rn-table-border': `rgba(${accentRgb}, 0.24)`,
+    '--rn-table-header-bg': `rgba(${accentRgb}, 0.10)`,
+    '--rn-footer-color': 'rgba(255, 255, 255, 0.68)',
+    '--rn-footer-border': `rgba(${accentRgb}, 0.22)`,
+    '--rn-footer-bg': 'rgba(0, 0, 0, 0.38)',
+    '--rn-cover-portrait-bg': '#000000',
+    '--rn-cover-content-bg': 'rgba(0, 0, 0, 0.68)',
+    '--rn-cover-title-color': accent,
+    '--rn-cover-summary-color': '#ffffff',
+    '--rn-cover-line': accent,
+    '--rn-placeholder-bg': 'rgba(255, 255, 255, 0.08)',
+    '--rn-placeholder-color': '#ffffff',
+  });
+}
+
 const baseMinimalVariables: Record<string, string> = {
   '--rn-frame-bg': 'linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%)',
   '--rn-frame-border': 'rgba(15, 23, 42, 0.08)',
@@ -39,6 +86,8 @@ const baseMinimalVariables: Record<string, string> = {
   '--rn-title-color': '#111827',
   '--rn-body-color': '#374151',
   '--rn-heading-color': '#111827',
+  '--rn-emphasis-color': 'inherit',
+  '--rn-emphasis-bg': 'transparent',
   '--rn-link-color': '#0f766e',
   '--rn-link-border': 'rgba(15, 118, 110, 0.24)',
   '--rn-quote-bg': '#f8fafc',
@@ -96,6 +145,20 @@ export const REDNOTE_TEMPLATE_PRESETS: Record<string, RedNoteTemplatePreset> = {
       '--rn-link-border': 'rgba(139, 94, 60, 0.18)',
       '--rn-footer-bg': 'rgba(84, 76, 68, 0.03)',
     }
+  ),
+  'dark-orange': createDarkAccentTemplate(
+    'dark-orange',
+    '暗橙风格',
+    '黑底白字，标题和重点使用 #f79300',
+    '#f79300',
+    '247, 147, 0'
+  ),
+  'neon-green': createDarkAccentTemplate(
+    'neon-green',
+    '亮绿风格',
+    '参考亮绿标题风格，黑底白字',
+    '#00ff2a',
+    '0, 255, 42'
   ),
   minimal: createMinimalTemplate(
     'minimal',
@@ -170,6 +233,42 @@ export const REDNOTE_TEMPLATE_PRESETS: Record<string, RedNoteTemplatePreset> = {
       '--rn-footer-color': 'rgba(2, 132, 199, 0.64)',
       '--rn-footer-border': 'rgba(0, 180, 216, 0.14)',
       '--rn-footer-bg': 'rgba(0, 180, 216, 0.03)',
+    }
+  ),
+  'cyber-orange': createMinimalTemplate(
+    'cyber-orange',
+    '冷灰橙调',
+    '浅灰黑渐变，深橙标题',
+    {
+      '--rn-frame-bg': 'linear-gradient(180deg, #eef0f3 0%, #dfe4ea 100%)',
+      '--rn-panel-bg': '#f5f6f8',
+      '--rn-frame-border': 'rgba(15, 23, 42, 0.18)',
+      '--rn-frame-shadow': '0 22px 56px rgba(15, 23, 42, 0.13)',
+      '--rn-header-badge-bg': 'rgba(201, 95, 0, 0.10)',
+      '--rn-header-badge-color': '#c95f00',
+      '--rn-avatar-bg': 'linear-gradient(135deg, #dce2e9 0%, #cfd7e0 100%)',
+      '--rn-avatar-color': '#475569',
+      '--rn-name-color': '#0f172a',
+      '--rn-id-color': 'rgba(11, 114, 133, 0.74)',
+      '--rn-time-color': 'rgba(11, 114, 133, 0.52)',
+      '--rn-kicker-bg': 'rgba(15, 23, 42, 0.06)',
+      '--rn-kicker-color': '#475569',
+      '--rn-title-color': '#c95f00',
+      '--rn-body-color': '#243041',
+      '--rn-heading-color': '#c95f00',
+      '--rn-emphasis-color': '#c95f00',
+      '--rn-emphasis-bg': 'rgba(201, 95, 0, 0.10)',
+      '--rn-link-color': '#c95f00',
+      '--rn-link-border': 'rgba(201, 95, 0, 0.24)',
+      '--rn-quote-bg': '#e8edf2',
+      '--rn-quote-border': 'rgba(15, 23, 42, 0.14)',
+      '--rn-code-bg': '#e4e9ef',
+      '--rn-code-color': '#c95f00',
+      '--rn-table-border': 'rgba(15, 23, 42, 0.16)',
+      '--rn-table-header-bg': 'rgba(15, 23, 42, 0.07)',
+      '--rn-footer-color': 'rgba(51, 65, 85, 0.66)',
+      '--rn-footer-border': 'rgba(15, 23, 42, 0.14)',
+      '--rn-footer-bg': 'rgba(15, 23, 42, 0.05)',
     }
   ),
   warm: createMinimalTemplate(
