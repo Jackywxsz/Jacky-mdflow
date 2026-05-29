@@ -28,42 +28,21 @@
 
 ### 2026-05-29
 
-- 小红书新增 `暗橙风格`、`亮绿风格`、`冷灰橙调` 模板。
-- `暗橙风格` 和 `亮绿风格` 使用黑底卡片，正文保持白色，标题、重点标注和链接使用主题强调色。
-- `冷灰橙调` 基于 `赛博薄荷` 调整，使用浅灰黑渐变背景和深橙标题。
-- 小红书模板下拉顺序调整为 `Jacky 模板`、`默认主题` 优先。
-- 小红书内容里的 `**加粗**`、`*强调*`、`==高亮==` 会跟随模板重点色。
-- 修复暗色小红书模板下载图片时被白色背景覆盖，导致白色文字不可见的问题。
+- 小红书新增 `暗橙风格`、`亮绿风格`、`冷灰橙调` 3 个模板。
+- 暗色模板下载图片时不再变成白底，白色文字可以正常显示。
+- 模板下拉顺序调整为 `Jacky 模板`、`默认主题` 优先。
+- 加粗、强调和高亮文字会跟随当前模板的重点色。
 
-## 更新规则
+## 如何更新插件
 
-### 日常更新
+1. 前往 [Releases](https://github.com/Jackywxsz/mdflow-publisher/releases) 下载最新版。
+2. 解压后把 `main.js`、`styles.css`、`manifest.json` 覆盖到你的插件目录：
 
-默认直接更新 `main` 分支。`main` 是 GitHub 仓库的主线版本，推送到 `main` 就等于把内容直接补充进仓库。
+```text
+.obsidian/plugins/mdflow-publisher/
+```
 
-### 小红书模板更新
-
-- 新增或调整模板：改 `src/rednote/template-presets.ts`
-- 调整模板专属间距、标题、强调样式：改 `src/styles.css`
-- 调整下载、截图、导出逻辑：改 `src/exporters/rednote-exporter.ts`
-- 改完必须运行 `npm run build`，让根目录的 `main.js` 和 `styles.css` 同步更新
-
-### 提交规则
-
-- 每次提交只包含本次相关文件
-- 构建产物 `main.js`、根目录 `styles.css` 需要和源码一起提交
-- 未明确要发布的个人说明文件、临时文件不要提交
-- 提交前至少执行一次 `npm run build`
-
-### 发布规则
-
-如果只是补充仓库代码，推送到 `main` 即可。
-
-如果要做 GitHub Release，需要上传这 3 个文件：
-
-- `main.js`
-- `styles.css`
-- `manifest.json`
+3. 重启 Obsidian，或关闭再启用 `MDFlow Publisher` 插件。
 
 ## 安装
 
