@@ -46,6 +46,7 @@ export class MDFlowView extends ItemView {
   private redNoteGuidePopoverEl: HTMLElement | null = null;
   private previewRunId = 0;
   private editorPreviewDebounce: number | null = null;
+  private activeLeafPreviewDebounce: number | null = null;
 
   constructor(
     leaf: WorkspaceLeaf,
@@ -239,8 +240,8 @@ export class MDFlowView extends ItemView {
     popover.innerHTML = `
       <div class="mdflow-rn-guide-title">使用指南</div>
       <div class="mdflow-rn-guide-content">
-        <div class="mdflow-rn-guide-item">1. <b>核心用法</b>：用二级标题(##)来分割内容，每个标题生成一张小红书配图</div>
-        <div class="mdflow-rn-guide-item">2. <b>内容分页</b>：在二级标题(##)下使用 --- 可将内容分割为多页，每页都会带上标题</div>
+        <div class="mdflow-rn-guide-item">1. <b>核心用法</b>：用二级标题(##)标记分节，内容会自动排满页面</div>
+        <div class="mdflow-rn-guide-item">2. <b>内容分页</b>：需要固定换页时使用 ---，否则会根据文字、图片和代码块自动分页</div>
         <div class="mdflow-rn-guide-item">3. <b>首图制作</b>：单独调整首节字号至 20-24px，使用【下载当前页】导出</div>
         <div class="mdflow-rn-guide-item">4. <b>长文优化</b>：内容较多的章节可调小字号至 14-16px 后单独导出</div>
         <div class="mdflow-rn-guide-item">5. <b>批量操作</b>：保持统一字号时，用【导出全部页】批量生成</div>
@@ -386,11 +387,7 @@ export class MDFlowView extends ItemView {
         this.cancelEditorPreviewDebounce();
 
         if (file && file.extension === 'md') {
-          this.previewRunId += 1;
-          this.activeFile = file;
-          this.renderedHtml = '';
-          this.showLoading('正在生成排版预览...');
-          await this.updatePreview(undefined, file);
+          await this.updatePreviewForOpenedFile(file);
           return;
         }
 
@@ -422,6 +419,21 @@ export class MDFlowView extends ItemView {
           this.editorPreviewDebounce = null;
           void this.updatePreview(liveMarkdown, file);
         }, this.currentPlatform === 'rednote' ? 80 : 120);
+      })
+    );
+
+    this.registerEvent(
+      this.app.workspace.on('active-leaf-change', () => {
+        const file = this.app.workspace.getActiveFile();
+        if (!file || file.extension !== 'md' || file.path === this.activeFile?.path) {
+          return;
+        }
+
+        this.cancelActiveLeafPreviewDebounce();
+        this.activeLeafPreviewDebounce = window.setTimeout(() => {
+          this.activeLeafPreviewDebounce = null;
+          void this.updatePreviewForOpenedFile(file);
+        }, 50);
       })
     );
 
@@ -494,7 +506,19 @@ export class MDFlowView extends ItemView {
     input.click();
   }
 
-  private async updatePreview(markdownOverride?: string, fileOverride?: TFile): Promise<void> {
+  private async updatePreviewForOpenedFile(file: TFile): Promise<void> {
+    this.previewRunId += 1;
+    this.activeFile = file;
+    this.renderedHtml = '';
+    this.showLoading('正在生成排版预览...');
+    await this.updatePreview(undefined, file, false);
+  }
+
+  private async updatePreview(
+    markdownOverride?: string,
+    fileOverride?: TFile,
+    preferLiveMarkdown = true
+  ): Promise<void> {
     const activeFile = fileOverride || this.app.workspace.getActiveFile();
     if (!activeFile || activeFile.extension !== 'md') {
       this.activeFile = null;
@@ -507,7 +531,7 @@ export class MDFlowView extends ItemView {
     this.activeFile = activeFile;
 
     try {
-      const markdown = markdownOverride ?? await this.readCurrentMarkdown(activeFile);
+      const markdown = markdownOverride ?? await this.readCurrentMarkdown(activeFile, preferLiveMarkdown);
       if (runId !== this.previewRunId) return;
 
       const renderedHtml = await this.converter.convertToHtml(markdown, activeFile);
@@ -648,8 +672,8 @@ export class MDFlowView extends ItemView {
     };
   }
 
-  private async readCurrentMarkdown(file: TFile): Promise<string> {
-    const liveMarkdown = this.getLiveMarkdownContent(file);
+  private async readCurrentMarkdown(file: TFile, preferLiveMarkdown = true): Promise<string> {
+    const liveMarkdown = preferLiveMarkdown ? this.getLiveMarkdownContent(file) : null;
     if (liveMarkdown !== null) {
       return liveMarkdown;
     }
@@ -681,8 +705,16 @@ export class MDFlowView extends ItemView {
     }
   }
 
+  private cancelActiveLeafPreviewDebounce(): void {
+    if (this.activeLeafPreviewDebounce !== null) {
+      window.clearTimeout(this.activeLeafPreviewDebounce);
+      this.activeLeafPreviewDebounce = null;
+    }
+  }
+
   async onClose(): Promise<void> {
     this.cancelEditorPreviewDebounce();
+    this.cancelActiveLeafPreviewDebounce();
     this.converter.dispose();
   }
 }

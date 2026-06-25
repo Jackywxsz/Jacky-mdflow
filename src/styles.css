@@ -539,6 +539,34 @@
   padding-left: 20px;
 }
 
+.mdflow-rednote-section-body .red-list-fragment {
+  margin-bottom: 6px;
+}
+
+.mdflow-rednote-section-body .red-list-fragment + .red-list-fragment {
+  margin-top: -2px;
+}
+
+.mdflow-rednote-section-body .red-list-continuation {
+  list-style: none;
+}
+
+.mdflow-rednote-section-body .red-list-continuation::before {
+  content: "续：";
+  color: rgba(142, 111, 103, 0.78);
+  font-weight: 700;
+}
+
+.mdflow-rednote-section-body .red-table-fragment,
+.mdflow-rednote-section-body .red-pre-fragment {
+  margin-bottom: 8px;
+}
+
+.mdflow-rednote-section-body .red-table-fragment + .red-table-fragment,
+.mdflow-rednote-section-body .red-pre-fragment + .red-pre-fragment {
+  margin-top: -4px;
+}
+
 .mdflow-rednote-section-body li {
   margin: 6px 0;
 }
@@ -774,15 +802,14 @@
 }
 
 .red-image {
-  max-width: 100%;
-  max-height: 220px;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 180px;
   display: block;
   margin: 14px auto;
   border-radius: 14px;
-  object-fit: cover;
+  object-fit: contain;
   box-shadow: 0 10px 24px rgba(43, 28, 17, 0.12);
+  background: rgba(255, 255, 255, 0.55);
 }
 
 .red-blockquote {

@@ -36,6 +36,17 @@ interface RedNotePreparedData {
   template: RedNoteTemplatePreset;
 }
 
+interface PaginationEntry {
+  node: Element | null;
+  sectionTitle?: string;
+  forceBreakBefore?: boolean;
+}
+
+interface PageMeasurer {
+  canFit: (title: string, nodes: Element[]) => boolean;
+  destroy: () => void;
+}
+
 const IMAGE_PLACEHOLDER =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 const VERIFIED_BADGE_IMAGE_SRC =
@@ -71,6 +82,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     stripObsidianArtifacts(doc);
     transformTaskLists(doc);
     unwrapListParagraphs(doc);
+    await this.preloadDocumentImages(doc);
 
     const cards = await this.buildCards(doc, context, settings, template);
 
@@ -79,6 +91,29 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       plainText: getPlainText(doc.body.innerHTML),
       data: { cards, settings, template },
     };
+  }
+
+  private async preloadDocumentImages(doc: Document): Promise<void> {
+    const sources = Array.from(doc.querySelectorAll('img'))
+      .map((image) => image.getAttribute('src') || '')
+      .filter(Boolean);
+
+    await Promise.all(
+      sources.map((src) => this.preloadImage(src))
+    );
+  }
+
+  private async preloadImage(src: string): Promise<void> {
+    await new Promise<void>((resolve) => {
+      const image = new Image();
+      image.onload = () => resolve();
+      image.onerror = () => resolve();
+      image.src = src;
+
+      if (image.complete) {
+        resolve();
+      }
+    });
   }
 
   mountPreview(
@@ -233,9 +268,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       });
     }
 
-    const contentCards = sections.flatMap((section) =>
-      this.paginateSection(section.title, section.nodes, settings)
-    );
+    const contentCards = this.paginateSections(sections, settings, template);
 
     if (contentCards.length === 0) {
       contentCards.push({
@@ -358,78 +391,478 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     return text.length > 96 ? `${text.slice(0, 96)}…` : text;
   }
 
-  private paginateSection(title: string, nodes: Element[], settings: RedNoteSettings): RedNoteCard[] {
-    const groups: Element[][] = [[]];
-    let groupIndex = 0;
+  private paginateSections(
+    sections: Array<{ title: string; nodes: Element[] }>,
+    settings: RedNoteSettings,
+    template: RedNoteTemplatePreset
+  ): RedNoteCard[] {
+    const firstSection = sections.find((section) => section.nodes.length > 0) || sections[0];
+    if (!firstSection) return [];
 
-    nodes.forEach((node) => {
-      if (node.tagName.toLowerCase() === 'hr') {
-        if (groups[groupIndex].length > 0) {
-          groupIndex += 1;
-          groups[groupIndex] = [];
-        }
-        return;
+    const doc = document.implementation.createHTMLDocument('');
+    const entries: PaginationEntry[] = [];
+
+    sections.forEach((section, sectionIndex) => {
+      if (sectionIndex > 0) {
+        entries.push({
+          node: this.createSectionHeading(doc, section.title),
+          sectionTitle: section.title,
+        });
       }
 
-      groups[groupIndex].push(node.cloneNode(true) as Element);
+      section.nodes.forEach((node) => {
+        if (node.tagName.toLowerCase() === 'hr') {
+          entries.push({ node: null, forceBreakBefore: true });
+          return;
+        }
+
+        entries.push({ node: node.cloneNode(true) as Element });
+      });
     });
 
-    return groups
-      .filter((group) => group.length > 0)
-      .flatMap((group) => this.paginateGroup(title, group, settings));
+    return this.paginateEntries(firstSection.title, entries, settings, template);
   }
 
-  private paginateGroup(title: string, nodes: Element[], settings: RedNoteSettings): RedNoteCard[] {
+  private createSectionHeading(doc: Document, title: string): Element {
+    const heading = doc.createElement('h2');
+    heading.textContent = title;
+    return heading;
+  }
+
+  private paginateEntries(
+    initialTitle: string,
+    entries: PaginationEntry[],
+    settings: RedNoteSettings,
+    template: RedNoteTemplatePreset
+  ): RedNoteCard[] {
     const cards: RedNoteCard[] = [];
-    const normalizedNodes = this.normalizePaginationNodes(nodes, settings);
-    const maxWeight = settings.fontSize >= 18 ? 3 : settings.fontSize <= 14 ? 5 : 4;
+    const normalizedEntries = this.normalizePaginationEntries(entries, settings);
+    const measurer = this.createPageMeasurer(settings, template);
+    let currentSectionTitle = initialTitle;
+    let currentPageTitle = initialTitle;
     let currentNodes: Element[] = [];
-    let currentWeight = 0;
 
     const flush = () => {
       if (currentNodes.length === 0) return;
 
       cards.push({
         kind: 'content',
-        title,
+        title: currentPageTitle,
         bodyHtml: this.buildCardBody(currentNodes),
         fileName: '',
       });
 
       currentNodes = [];
-      currentWeight = 0;
+      currentPageTitle = currentSectionTitle;
     };
 
-    normalizedNodes.forEach((node) => {
-      const weight = this.getNodeWeight(node);
-      if (currentNodes.length > 0 && currentWeight + weight > maxWeight) {
-        flush();
-      }
+    const appendNode = (node: Element) => {
+      const safeNodes = this.splitOversizedNode(node, currentPageTitle, measurer, settings);
 
-      currentNodes.push(node);
-      currentWeight += weight;
-    });
+      safeNodes.forEach((safeNode) => {
+        if (currentNodes.length > 0 && !measurer.canFit(currentPageTitle, [...currentNodes, safeNode])) {
+          flush();
+        }
+
+        currentNodes.push(safeNode);
+      });
+    };
+
+    try {
+      normalizedEntries.forEach((entry) => {
+        if (entry.forceBreakBefore) {
+          flush();
+          currentPageTitle = currentSectionTitle;
+          return;
+        }
+
+        if (!entry.node) return;
+
+        if (entry.sectionTitle) {
+          currentSectionTitle = entry.sectionTitle;
+
+          if (currentNodes.length === 0) {
+            currentPageTitle = currentSectionTitle;
+            return;
+          }
+
+          if (measurer.canFit(currentPageTitle, [...currentNodes, entry.node])) {
+            currentNodes.push(entry.node);
+            return;
+          }
+
+          flush();
+          currentPageTitle = currentSectionTitle;
+          return;
+        }
+
+        appendNode(entry.node);
+      });
+    } finally {
+      measurer.destroy();
+    }
 
     flush();
     return cards;
   }
 
-  private normalizePaginationNodes(nodes: Element[], settings: RedNoteSettings): Element[] {
+  private createPageMeasurer(
+    settings: RedNoteSettings,
+    template: RedNoteTemplatePreset
+  ): PageMeasurer {
+    if (!document.body) {
+      return {
+        canFit: () => true,
+        destroy: () => undefined,
+      };
+    }
+
+    const root = document.createElement('div');
+    root.style.position = 'fixed';
+    root.style.left = '-10000px';
+    root.style.top = '0';
+    root.style.width = '450px';
+    root.style.height = '600px';
+    root.style.visibility = 'hidden';
+    root.style.pointerEvents = 'none';
+    root.style.zIndex = '-1';
+
+    const imagePreview = document.createElement('div');
+    imagePreview.className = 'red-image-preview';
+    imagePreview.setAttribute('data-template-id', template.id);
+    imagePreview.setAttribute('style', this.buildPreviewStyle(settings, template));
+    imagePreview.style.width = '450px';
+    imagePreview.style.maxWidth = 'none';
+    imagePreview.style.height = '600px';
+    imagePreview.style.aspectRatio = 'auto';
+
+    const header = document.createElement('div');
+    header.className = 'red-preview-header';
+    header.innerHTML = this.renderHeader(settings);
+
+    const content = document.createElement('div');
+    content.className = 'red-preview-content';
+
+    const contentWrapper = document.createElement('div');
+    contentWrapper.className = 'red-content-wrapper';
+
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'red-content-container';
+
+    const section = document.createElement('section');
+    section.className = 'red-content-section red-section-active red-section-visible';
+
+    const footer = document.createElement('div');
+    footer.className = 'red-preview-footer';
+    footer.innerHTML = this.renderFooter(settings);
+
+    contentContainer.appendChild(section);
+    contentWrapper.appendChild(contentContainer);
+    content.appendChild(contentWrapper);
+    imagePreview.appendChild(header);
+    imagePreview.appendChild(content);
+    imagePreview.appendChild(footer);
+    root.appendChild(imagePreview);
+    document.body.appendChild(root);
+
+    return {
+      canFit: (title: string, nodes: Element[]) => {
+        section.innerHTML = this.renderContentSection(
+          {
+            kind: 'content',
+            title,
+            bodyHtml: this.buildCardBody(nodes),
+            fileName: '',
+          },
+          settings
+        );
+
+        return this.contentFitsMeasuredSection(imagePreview, section);
+      },
+      destroy: () => {
+        root.remove();
+      },
+    };
+  }
+
+  private contentFitsMeasuredSection(imagePreview: HTMLElement, section: HTMLElement): boolean {
+    const shell = section.querySelector('.mdflow-rednote-section-shell') as HTMLElement | null;
+    const title = section.querySelector('.mdflow-rednote-section-title') as HTMLElement | null;
+    const body = section.querySelector('.mdflow-rednote-section-body') as HTMLElement | null;
+    const tolerance = 0;
+
+    this.reserveImageSlotsForMeasure(section);
+
+    if (!shell || !title || !body) {
+      return imagePreview.scrollHeight <= imagePreview.clientHeight + tolerance;
+    }
+
+    const shellStyle = window.getComputedStyle(shell);
+    const shellPaddingBottom = Number.parseFloat(shellStyle.paddingBottom || '0') || 0;
+    const shellLimit = shell.getBoundingClientRect().bottom - shellPaddingBottom;
+    const titleBottom = title.getBoundingClientRect().bottom;
+    const bodyLastChild = body.lastElementChild as HTMLElement | null;
+    const bodyBottom = bodyLastChild
+      ? bodyLastChild.getBoundingClientRect().bottom
+      : body.getBoundingClientRect().bottom;
+    const contentBottom = Math.max(titleBottom, bodyBottom);
+
+    return contentBottom <= shellLimit + tolerance;
+  }
+
+  private reserveImageSlotsForMeasure(section: HTMLElement): void {
+    section.querySelectorAll('img').forEach((image) => {
+      if (image.complete && image.naturalWidth > 0) {
+        return;
+      }
+
+      image.style.width = '100%';
+      image.style.height = '180px';
+      image.style.objectFit = 'contain';
+    });
+  }
+
+  private splitOversizedNode(
+    node: Element,
+    title: string,
+    measurer: PageMeasurer,
+    settings: RedNoteSettings
+  ): Element[] {
+    if (measurer.canFit(title, [node])) {
+      return [node];
+    }
+
+    const tag = node.tagName.toLowerCase();
+
+    if (['p', 'blockquote'].includes(tag)) {
+      return this.splitTextBlockToFit(node, title, measurer, settings);
+    }
+
+    if (['ul', 'ol'].includes(tag)) {
+      return this.splitListFragmentToFit(node, title, measurer, settings);
+    }
+
+    if (tag === 'pre') {
+      return this.splitPreBlockToFit(node, title, measurer);
+    }
+
+    return [node];
+  }
+
+  private splitTextBlockToFit(
+    node: Element,
+    title: string,
+    measurer: PageMeasurer,
+    settings: RedNoteSettings
+  ): Element[] {
+    let maxChars = Math.max(18, Math.floor(this.getMaxTextBlockChars(settings) / 2));
+
+    while (maxChars >= 18) {
+      const chunks = this.splitTextBlock(node, maxChars);
+      if (chunks.every((chunk) => measurer.canFit(title, [chunk]))) {
+        return chunks;
+      }
+
+      maxChars = Math.floor(maxChars * 0.65);
+    }
+
+    return this.splitPlainTextElement(node, 18);
+  }
+
+  private splitListFragmentToFit(
+    node: Element,
+    title: string,
+    measurer: PageMeasurer,
+    settings: RedNoteSettings
+  ): Element[] {
+    const item = Array.from(node.children).find((child) => child.tagName.toLowerCase() === 'li');
+    if (!item) return [node];
+
+    let maxChars = Math.max(18, Math.floor(this.getMaxTextBlockChars(settings) / 2));
+
+    while (maxChars >= 18) {
+      const itemChunks = this.splitTextBlock(item, maxChars);
+      const listChunks = itemChunks.map((itemChunk, index) =>
+        this.createListFragmentFromItem(node, itemChunk, index > 0)
+      );
+
+      if (listChunks.every((chunk) => measurer.canFit(title, [chunk]))) {
+        return listChunks;
+      }
+
+      maxChars = Math.floor(maxChars * 0.65);
+    }
+
+    return [node];
+  }
+
+  private splitPreBlockToFit(node: Element, title: string, measurer: PageMeasurer): Element[] {
+    const code = node.querySelector('code');
+    const text = code?.textContent || node.textContent || '';
+    const lines = text.split('\n');
+
+    for (let maxLines = 4; maxLines >= 1; maxLines -= 1) {
+      const chunks = this.createPreChunks(node, lines, maxLines);
+      if (chunks.every((chunk) => measurer.canFit(title, [chunk]))) {
+        return chunks;
+      }
+    }
+
+    return [node];
+  }
+
+  private splitPlainTextElement(node: Element, maxChars: number): Element[] {
+    const text = node.textContent || '';
+    const chunks: Element[] = [];
+
+    for (let index = 0; index < text.length; index += maxChars) {
+      const clone = node.cloneNode(false) as Element;
+      clone.textContent = text.slice(index, index + maxChars);
+      chunks.push(clone);
+    }
+
+    return chunks.length > 0 ? chunks : [node];
+  }
+
+  private normalizePaginationEntries(
+    entries: PaginationEntry[],
+    settings: RedNoteSettings
+  ): PaginationEntry[] {
     const maxChars = this.getMaxTextBlockChars(settings);
 
-    return nodes.flatMap((node) => {
+    return entries.flatMap((entry) => {
+      if (!entry.node || entry.forceBreakBefore || entry.sectionTitle) {
+        return [entry];
+      }
+
+      const node = entry.node;
       const tag = node.tagName.toLowerCase();
+      if (['ul', 'ol'].includes(tag)) {
+        return this.splitListBlock(node).map((splitNode) => ({ node: splitNode }));
+      }
+
+      if (tag === 'table') {
+        return this.splitTableBlock(node).map((splitNode) => ({ node: splitNode }));
+      }
+
+      if (tag === 'pre') {
+        return this.splitPreBlock(node, settings).map((splitNode) => ({ node: splitNode }));
+      }
+
       if (!['p', 'blockquote'].includes(tag)) {
-        return [node];
+        return [entry];
       }
 
       const textLength = node.textContent?.trim().length || 0;
       if (textLength <= maxChars) {
-        return [node];
+        return [entry];
       }
 
-      return this.splitTextBlock(node, maxChars);
+      return this.splitTextBlock(node, maxChars).map((splitNode) => ({ node: splitNode }));
     });
+  }
+
+  private splitTableBlock(node: Element): Element[] {
+    const rows = Array.from(node.querySelectorAll('tr')).filter(
+      (row) => row.closest('table') === node
+    );
+
+    if (rows.length <= 2) {
+      return [node];
+    }
+
+    const headerRows = rows.filter((row, index) => index === 0 && Boolean(row.querySelector('th')));
+    const bodyRows = rows.slice(headerRows.length);
+
+    if (bodyRows.length <= 1) {
+      return [node];
+    }
+
+    return bodyRows.map((row) => {
+      const table = node.cloneNode(false) as Element;
+      table.classList.add('red-table-fragment');
+      headerRows.forEach((headerRow) => table.appendChild(headerRow.cloneNode(true)));
+      table.appendChild(row.cloneNode(true));
+      return table;
+    });
+  }
+
+  private splitPreBlock(node: Element, settings: RedNoteSettings): Element[] {
+    const text = node.querySelector('code')?.textContent || node.textContent || '';
+    const lines = text.split('\n');
+    const maxLines = settings.fontSize >= 18 ? 6 : settings.fontSize <= 14 ? 10 : 8;
+
+    if (lines.length <= maxLines) {
+      return [node];
+    }
+
+    return this.createPreChunks(node, lines, maxLines);
+  }
+
+  private createPreChunks(node: Element, lines: string[], maxLines: number): Element[] {
+    const code = node.querySelector('code');
+    const chunks: Element[] = [];
+
+    for (let index = 0; index < lines.length; index += maxLines) {
+      const pre = node.cloneNode(false) as Element;
+      pre.classList.add('red-pre-fragment');
+
+      if (code) {
+        const codeClone = code.cloneNode(false) as Element;
+        codeClone.textContent = lines.slice(index, index + maxLines).join('\n');
+        pre.appendChild(codeClone);
+      } else {
+        pre.textContent = lines.slice(index, index + maxLines).join('\n');
+      }
+
+      chunks.push(pre);
+    }
+
+    return chunks;
+  }
+
+  private splitListBlock(node: Element): Element[] {
+    const items = Array.from(node.children).filter(
+      (child) => child.tagName.toLowerCase() === 'li'
+    );
+
+    if (items.length <= 1) {
+      return [node];
+    }
+
+    const tag = node.tagName.toLowerCase();
+    const baseStart = Number.parseInt(node.getAttribute('start') || '1', 10);
+    const startNumber = Number.isNaN(baseStart) ? 1 : baseStart;
+
+    return items.map((item, index) => {
+      const itemValue = Number.parseInt(item.getAttribute('value') || '', 10);
+      const listStart = Number.isNaN(itemValue) ? startNumber + index : itemValue;
+      return this.createListFragmentFromItem(node, item, false, tag === 'ol' ? listStart : undefined);
+    });
+  }
+
+  private createListFragmentFromItem(
+    sourceList: Element,
+    item: Element,
+    isContinuation: boolean,
+    start?: number
+  ): Element {
+    const list = sourceList.cloneNode(false) as Element;
+    const tag = sourceList.tagName.toLowerCase();
+    list.classList.add('red-list-fragment');
+
+    if (tag === 'ol') {
+      const fallbackStart = Number.parseInt(sourceList.getAttribute('start') || '1', 10);
+      list.setAttribute('start', String(start ?? (Number.isNaN(fallbackStart) ? 1 : fallbackStart)));
+    }
+
+    const itemClone = item.cloneNode(true) as Element;
+    if (isContinuation) {
+      itemClone.classList.add('red-list-continuation');
+    }
+
+    list.appendChild(itemClone);
+    return list;
   }
 
   private getMaxTextBlockChars(settings: RedNoteSettings): number {
@@ -534,22 +967,6 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const lastNode = textNodes[textNodes.length - 1];
     return { node: lastNode, offset: lastNode.textContent?.length || 0 };
-  }
-
-  private getNodeWeight(node: Element): number {
-    const tag = node.tagName.toLowerCase();
-    const textLength = node.textContent?.trim().length || 0;
-
-    if (tag === 'img') return 3;
-    if (['pre', 'blockquote', 'table'].includes(tag)) return 2;
-    if (['ul', 'ol'].includes(tag)) {
-      return Math.min(4, Math.max(1, Math.ceil(node.querySelectorAll('li').length / 2)));
-    }
-    if (['h1', 'h2', 'h3'].includes(tag)) return 2;
-    if (textLength > 280) return 4;
-    if (textLength > 180) return 3;
-    if (textLength > 90) return 2;
-    return 1;
   }
 
   private buildCardBody(nodes: Element[]): string {
