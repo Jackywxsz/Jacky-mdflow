@@ -7,7 +7,12 @@ import {
   RedNoteSettings,
   clampRedNoteFontSize,
 } from './types';
-import { DEFAULT_REDNOTE_TEMPLATE_ID, REDNOTE_TEMPLATE_PRESETS, getRedNoteTemplatePreset } from './template-presets';
+import {
+  DEFAULT_REDNOTE_TEMPLATE_ID,
+  REDNOTE_TEMPLATE_PRESETS,
+  getRedNoteTemplatePreset,
+  isVisibleRedNoteTemplate,
+} from './template-presets';
 
 interface MDFlowPluginData {
   rednote?: Partial<RedNoteSettings>;
@@ -93,7 +98,7 @@ export class RedNoteSettingsManager extends Events {
       customFonts: input?.customFonts?.length ? input.customFonts : [...REDNOTE_FONT_OPTIONS],
     };
 
-    const templateId = REDNOTE_TEMPLATE_PRESETS[merged.templateId]
+    const templateId = isVisibleRedNoteTemplate(merged.templateId)
       ? merged.templateId
       : DEFAULT_REDNOTE_TEMPLATE_ID;
 

@@ -235,6 +235,42 @@ export const REDNOTE_TEMPLATE_PRESETS: Record<string, RedNoteTemplatePreset> = {
       '--rn-footer-bg': 'rgba(0, 180, 216, 0.03)',
     }
   ),
+  'cyber-brand-orange': createMinimalTemplate(
+    'cyber-brand-orange',
+    '赛博橙式',
+    '赛博薄荷骨架，品牌橙标题与标签',
+    {
+      '--rn-frame-bg': 'linear-gradient(180deg, #fbfeff 0%, #f3fbff 100%)',
+      '--rn-panel-bg': '#ffffff',
+      '--rn-frame-border': 'rgba(0, 180, 216, 0.14)',
+      '--rn-frame-shadow': '0 22px 56px rgba(2, 132, 199, 0.08)',
+      '--rn-header-badge-bg': 'rgba(217, 112, 0, 0.12)',
+      '--rn-header-badge-color': '#d97000',
+      '--rn-avatar-bg': 'linear-gradient(135deg, #d6fbff 0%, #c8f1ff 100%)',
+      '--rn-avatar-color': '#0b7285',
+      '--rn-name-color': '#0f172a',
+      '--rn-id-color': 'rgba(11, 114, 133, 0.74)',
+      '--rn-time-color': 'rgba(11, 114, 133, 0.52)',
+      '--rn-kicker-bg': 'rgba(217, 112, 0, 0.10)',
+      '--rn-kicker-color': '#d97000',
+      '--rn-title-color': '#d97000',
+      '--rn-body-color': '#334155',
+      '--rn-heading-color': '#d97000',
+      '--rn-emphasis-color': '#d97000',
+      '--rn-emphasis-bg': 'rgba(217, 112, 0, 0.10)',
+      '--rn-link-color': '#d97000',
+      '--rn-link-border': 'rgba(217, 112, 0, 0.24)',
+      '--rn-quote-bg': '#f7fcff',
+      '--rn-quote-border': 'rgba(0, 180, 216, 0.14)',
+      '--rn-code-bg': '#f7fcff',
+      '--rn-code-color': '#d97000',
+      '--rn-table-border': 'rgba(0, 180, 216, 0.16)',
+      '--rn-table-header-bg': 'rgba(0, 180, 216, 0.06)',
+      '--rn-footer-color': 'rgba(2, 132, 199, 0.64)',
+      '--rn-footer-border': 'rgba(0, 180, 216, 0.14)',
+      '--rn-footer-bg': 'rgba(0, 180, 216, 0.03)',
+    }
+  ),
   'cyber-orange': createMinimalTemplate(
     'cyber-orange',
     '冷灰橙调',
@@ -492,13 +528,21 @@ export const REDNOTE_TEMPLATE_PRESETS: Record<string, RedNoteTemplatePreset> = {
 
 export const DEFAULT_REDNOTE_TEMPLATE_ID = 'jacky-cover';
 
+const HIDDEN_REDNOTE_TEMPLATE_IDS = new Set(['dark-orange', 'neon-green', 'elegant', 'yueling']);
+
 export function getRedNoteTemplatePreset(id: string): RedNoteTemplatePreset {
   return REDNOTE_TEMPLATE_PRESETS[id] || REDNOTE_TEMPLATE_PRESETS[DEFAULT_REDNOTE_TEMPLATE_ID];
 }
 
+export function isVisibleRedNoteTemplate(id: string): boolean {
+  return Boolean(REDNOTE_TEMPLATE_PRESETS[id]) && !HIDDEN_REDNOTE_TEMPLATE_IDS.has(id);
+}
+
 export function getRedNoteTemplateOptions(): Array<{ label: string; value: string }> {
-  return Object.values(REDNOTE_TEMPLATE_PRESETS).map((template) => ({
-    label: template.name,
-    value: template.id,
-  }));
+  return Object.values(REDNOTE_TEMPLATE_PRESETS)
+    .filter((template) => isVisibleRedNoteTemplate(template.id))
+    .map((template) => ({
+      label: template.name,
+      value: template.id,
+    }));
 }
