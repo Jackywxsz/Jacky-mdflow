@@ -2,6 +2,17 @@
 
 在 Obsidian 里完成「Markdown 写作 -> 平台预览 -> 一键复制 / 导出」的内容分发插件。当前支持微信公众号、X Articles、小红书。
 
+## 付费知识库与答疑群
+
+<a href="https://mp.weixin.qq.com/s/x924y3O9-nWda5OTHArKKg">
+  <img src="assets/creator-ai-course.jpg" alt="创作者 AI 课：用 AI 杠杆、代码杠杆、媒体杠杆，重塑内容创作生产体系" width="720">
+</a>
+
+我的付费知识库与答疑群欢迎加入：
+[https://mp.weixin.qq.com/s/x924y3O9-nWda5OTHArKKg](https://mp.weixin.qq.com/s/x924y3O9-nWda5OTHArKKg)
+
+期待与你的深度链接，一起用AI赋能，创作生财📈
+
 ## 当前能力
 
 ### 微信公众号
