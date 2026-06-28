@@ -1,6 +1,8 @@
-# MDFlow Publisher
+# Jacky-mdflow
 
 在 Obsidian 里完成「Markdown 写作 -> 平台预览 -> 一键复制 / 导出」的内容分发插件。当前支持微信公众号、X Articles、小红书。
+
+兼容说明：插件 id 和安装目录仍保留 `mdflow-publisher`，避免影响已经安装的用户；显示名称改为 `Jacky-mdflow`。
 
 ## 付费知识库与答疑群
 
@@ -58,21 +60,21 @@
 
 ## 如何更新插件
 
-1. 前往 [Releases](https://github.com/Jackywxsz/mdflow-publisher/releases) 下载最新版发布包。
+1. 前往 [Releases](https://github.com/Jackywxsz/Jacky-mdflow/releases) 下载最新版发布包。
 2. 解压后把 `main.js`、`styles.css`、`manifest.json` 覆盖到你的 Obsidian 插件目录：
 
 ```text
 .obsidian/plugins/mdflow-publisher/
 ```
 
-3. 重启 Obsidian，或关闭再启用 `MDFlow Publisher` 插件。
+3. 重启 Obsidian，或关闭再启用 `Jacky-mdflow` 插件。
 4. 在插件设置里确认版本号为最新版。
 
 ## 安装
 
 ### 手动安装
 
-1. 前往 [Releases](https://github.com/Jackywxsz/mdflow-publisher/releases) 页面下载最新发布包
+1. 前往 [Releases](https://github.com/Jackywxsz/Jacky-mdflow/releases) 页面下载最新发布包
 2. 安装时只需要 `main.js`、`styles.css`、`manifest.json` 这 3 个文件
 3. 如果你下载的是压缩包，解压后把这 3 个文件放到你的 Vault 目录：
 
@@ -81,12 +83,12 @@
 ```
 
 4. 重启 Obsidian
-5. 在 `设置 -> 第三方插件` 中启用 `MDFlow Publisher`
+5. 在 `设置 -> 第三方插件` 中启用 `Jacky-mdflow`
 
 ### 开发模式
 
 ```bash
-git clone https://github.com/Jackywxsz/mdflow-publisher.git
+git clone https://github.com/Jackywxsz/Jacky-mdflow.git
 cd mdflow-publisher
 npm install
 npm run dev
@@ -95,7 +97,7 @@ npm run dev
 ## 使用方式
 
 1. 打开一个 Markdown 文件
-2. 点击左侧边栏图标，打开右侧 `MDFlow Publisher` 面板
+2. 点击左侧边栏图标，打开右侧 `Jacky-mdflow` 面板
 3. 选择目标平台
 4. 根据平台导出：
 

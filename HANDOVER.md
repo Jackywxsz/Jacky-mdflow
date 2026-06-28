@@ -1,4 +1,4 @@
-# MDFlow Publisher 交接文档
+# Jacky-mdflow 交接文档
 
 更新时间：2026-04-01 20:24（Asia/Shanghai）
 
@@ -417,7 +417,7 @@ npm run deploy
 建议测试方式：
 
 1. 打开测试文档
-2. 在 Obsidian 右侧打开 `MDFlow Publisher`
+2. 在 Obsidian 右侧打开 `Jacky-mdflow`
 3. 切换到 `📕 小红书`
 4. 改模板 / 改标题级别 / 改字号
 5. 导出 ZIP 观察每页是否被截断

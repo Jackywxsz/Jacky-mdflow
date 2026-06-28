@@ -15,11 +15,11 @@ export class RedNoteAboutModal extends Modal {
     const body = card.createDiv({ cls: 'mdflow-about-body' });
 
     // Title
-    body.createEl('h2', { cls: 'mdflow-about-title', text: '关于 MDFlow' });
+    body.createEl('h2', { cls: 'mdflow-about-title', text: '关于 Jacky-mdflow' });
 
     // Plugin intro
     const pluginIntro = [
-      'MDFlow 是一款 Obsidian 排版分发插件 —— 在 Obsidian 里用 Markdown 写作，一键生成适配微信公众号、X Articles、小红书图文的精美排版，直接复制粘贴即可发布，告别重复排版的繁琐。',
+      'Jacky-mdflow 是一款 Obsidian 排版分发插件 —— 在 Obsidian 里用 Markdown 写作，一键生成适配微信公众号、X Articles、小红书图文的精美排版，直接复制粘贴即可发布，告别重复排版的繁琐。',
       '由 Jacky 独立开发与维护。白天做商业内容策划，下班研究 AI 与效率工具，希望用技术让创作者专注于内容本身。',
     ];
     pluginIntro.forEach((line) => body.createEl('p', { text: line }));
@@ -29,7 +29,7 @@ export class RedNoteAboutModal extends Modal {
     supportSection.createEl('h3', { cls: 'mdflow-about-section-title', text: '请我喝杯咖啡' });
     supportSection.createEl('p', {
       cls: 'mdflow-about-section-text',
-      text: '如果 MDFlow 帮你省下了排版的时间，愿意的话请我喝杯咖啡吧。你的每一份支持，都是我持续打磨这款工具最大的动力。',
+      text: '如果 Jacky-mdflow 帮你省下了排版的时间，愿意的话请我喝杯咖啡吧。你的每一份支持，都是我持续打磨这款工具最大的动力。',
     });
     this.renderQrCard(supportSection, WECHAT_PAY_QR, '微信扫一扫打赏');
 

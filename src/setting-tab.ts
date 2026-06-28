@@ -19,7 +19,7 @@ export class MDFlowSettingTab extends PluginSettingTab {
     const fontOptions = this.redNoteSettings.getFontOptions();
 
     containerEl.empty();
-    containerEl.createEl('h2', { text: 'MDFlow Publisher' });
+    containerEl.createEl('h2', { text: 'Jacky-mdflow' });
     containerEl.createEl('p', {
       text: '这里管理小红书模板、账号信息和导流素材。顶部工具栏负责快速切换，设置页负责长期保存。',
     });

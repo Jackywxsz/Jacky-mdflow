@@ -1,7 +1,7 @@
 {
   "name": "mdflow-publisher",
   "version": "1.1.0",
-  "description": "Obsidian 全平台内容分发插件",
+  "description": "Jacky-mdflow Obsidian 全平台内容分发插件",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",

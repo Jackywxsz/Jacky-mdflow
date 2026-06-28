@@ -71,7 +71,7 @@ export class MDFlowView extends ItemView {
   }
 
   getDisplayText(): string {
-    return 'MDFlow Publisher';
+    return 'Jacky-mdflow';
   }
 
   getIcon(): string {
