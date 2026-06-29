@@ -211,4 +211,6 @@ npm run deploy
 
 ## License
 
-[MIT](LICENSE)
+Jacky-mdflow 的代码以 [GNU Affero General Public License v3.0](LICENSE) 授权。
+
+仓库中的品牌名称、课程资料、宣传文案、截图、图片素材和社群引导内容不包含在代码开源授权范围内，除非另有说明。
