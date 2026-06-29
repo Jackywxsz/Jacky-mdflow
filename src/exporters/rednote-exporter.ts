@@ -646,8 +646,9 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       }
 
       image.style.width = '100%';
-      image.style.height = '180px';
-      image.style.objectFit = 'contain';
+      image.style.height = 'auto';
+      image.style.aspectRatio = '16 / 9';
+      image.style.objectFit = 'cover';
     });
   }
 
