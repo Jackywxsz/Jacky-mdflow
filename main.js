@@ -5070,32 +5070,27 @@ var RedNoteExporter = class {
     return text.length > 96 ? `${text.slice(0, 96)}\u2026` : text;
   }
   paginateSections(sections, settings, template) {
+    if (settings.layoutMode === "heading-sections") {
+      return sections.flatMap((section) => {
+        const entries2 = this.createPaginationEntries(section.nodes);
+        return this.paginateEntries(section.title, entries2, settings, template);
+      });
+    }
     const firstSection = sections.find((section) => section.nodes.length > 0) || sections[0];
     if (!firstSection)
       return [];
-    const doc = document.implementation.createHTMLDocument("");
-    const entries = [];
-    sections.forEach((section, sectionIndex) => {
-      if (sectionIndex > 0) {
-        entries.push({
-          node: this.createSectionHeading(doc, section.title),
-          sectionTitle: section.title
-        });
-      }
-      section.nodes.forEach((node) => {
-        if (node.tagName.toLowerCase() === "hr") {
-          entries.push({ node: null, forceBreakBefore: true });
-          return;
-        }
-        entries.push({ node: node.cloneNode(true) });
-      });
-    });
+    const entries = this.createPaginationEntries(
+      sections.flatMap((section) => section.nodes)
+    );
     return this.paginateEntries(firstSection.title, entries, settings, template);
   }
-  createSectionHeading(doc, title) {
-    const heading = doc.createElement("h2");
-    heading.textContent = title;
-    return heading;
+  createPaginationEntries(nodes) {
+    return nodes.map((node) => {
+      if (node.tagName.toLowerCase() === "hr") {
+        return { node: null, forceBreakBefore: true };
+      }
+      return { node: node.cloneNode(true) };
+    });
   }
   paginateEntries(initialTitle, entries, settings, template) {
     const cards = [];
@@ -5118,31 +5113,12 @@ var RedNoteExporter = class {
     };
     const appendNode = (node) => {
       const safeNodes = this.splitOversizedNode(node, currentPageTitle, measurer, settings);
-      for (let index = 0; index < safeNodes.length; index += 1) {
-        const safeNode = safeNodes[index];
+      safeNodes.forEach((safeNode) => {
         if (currentNodes.length > 0 && !measurer.canFit(currentPageTitle, [...currentNodes, safeNode])) {
-          const remainingSpaceNodes = this.splitNodeForRemainingSpace(
-            safeNode,
-            currentPageTitle,
-            currentNodes,
-            measurer,
-            settings
-          );
-          if (remainingSpaceNodes.length > 1 && measurer.canFit(currentPageTitle, [...currentNodes, remainingSpaceNodes[0]])) {
-            currentNodes.push(remainingSpaceNodes[0]);
-            flush();
-            safeNodes.splice(index, 1, ...remainingSpaceNodes.slice(1));
-            index -= 1;
-            continue;
-          }
-          if (remainingSpaceNodes.length === 1 && remainingSpaceNodes[0] !== safeNode && measurer.canFit(currentPageTitle, [...currentNodes, remainingSpaceNodes[0]])) {
-            currentNodes.push(remainingSpaceNodes[0]);
-            continue;
-          }
           flush();
         }
         currentNodes.push(safeNode);
-      }
+      });
     };
     try {
       normalizedEntries.forEach((entry) => {
@@ -5273,49 +5249,11 @@ var RedNoteExporter = class {
       if (image.complete && image.naturalWidth > 0) {
         return;
       }
-      if (image.style.height && image.style.height !== "auto") {
-        return;
-      }
       image.style.width = "100%";
       image.style.height = "auto";
       image.style.aspectRatio = "16 / 9";
       image.style.objectFit = "cover";
     });
-  }
-  splitNodeForRemainingSpace(node, title, currentNodes, measurer, settings) {
-    const tag = node.tagName.toLowerCase();
-    if (tag === "img") {
-      return this.fitImageToRemainingSpace(node, title, currentNodes, measurer);
-    }
-    if (["p", "blockquote"].includes(tag)) {
-      return this.splitTextBlockForRemainingSpace(node, title, currentNodes, measurer, settings);
-    }
-    return [node];
-  }
-  fitImageToRemainingSpace(node, title, currentNodes, measurer) {
-    const heights = [260, 220, 180, 140];
-    for (const height of heights) {
-      const candidate = node.cloneNode(true);
-      candidate.classList.add("red-image-inline-fit");
-      candidate.style.setProperty("height", `${height}px`, "important");
-      candidate.style.setProperty("max-height", `${height}px`, "important");
-      candidate.style.setProperty("object-fit", "contain", "important");
-      if (measurer.canFit(title, [...currentNodes, candidate])) {
-        return [candidate];
-      }
-    }
-    return [node];
-  }
-  splitTextBlockForRemainingSpace(node, title, currentNodes, measurer, settings) {
-    let maxChars = Math.max(18, Math.floor(this.getMaxTextBlockChars(settings) / 2));
-    while (maxChars >= 18) {
-      const chunks = this.splitTextBlock(node, maxChars);
-      if (chunks.length > 1 && measurer.canFit(title, [...currentNodes, chunks[0]]) && chunks.every((chunk) => measurer.canFit(title, [chunk]))) {
-        return chunks;
-      }
-      maxChars = Math.floor(maxChars * 0.7);
-    }
-    return [node];
   }
   splitOversizedNode(node, title, measurer, settings) {
     if (measurer.canFit(title, [node])) {
@@ -5633,10 +5571,57 @@ var RedNoteExporter = class {
     });
     container.querySelectorAll("img").forEach((img) => {
       img.classList.add("red-image");
+      const size = this.readDataImageSize(img.getAttribute("src") || "");
+      if (size && size.height / Math.max(size.width, 1) >= 1.2) {
+        img.classList.add("red-image-tall");
+      }
       img.removeAttribute("width");
       img.removeAttribute("height");
       img.setAttribute("loading", "eager");
     });
+  }
+  readDataImageSize(src) {
+    const match = src.match(/^data:image\/(png|jpeg|jpg);base64,(.+)$/i);
+    if (!match)
+      return null;
+    const type = match[1].toLowerCase();
+    const binary = atob(match[2].slice(0, 4096));
+    if (type === "png" && binary.length >= 24) {
+      return {
+        width: this.readUInt32BE(binary, 16),
+        height: this.readUInt32BE(binary, 20)
+      };
+    }
+    if ((type === "jpeg" || type === "jpg") && binary.length > 4) {
+      return this.readJpegSize(binary);
+    }
+    return null;
+  }
+  readUInt32BE(binary, offset) {
+    return (binary.charCodeAt(offset) << 24 | binary.charCodeAt(offset + 1) << 16 | binary.charCodeAt(offset + 2) << 8 | binary.charCodeAt(offset + 3)) >>> 0;
+  }
+  readUInt16BE(binary, offset) {
+    return binary.charCodeAt(offset) << 8 | binary.charCodeAt(offset + 1);
+  }
+  readJpegSize(binary) {
+    let offset = 2;
+    while (offset + 8 < binary.length) {
+      if (binary.charCodeAt(offset) !== 255) {
+        return null;
+      }
+      const marker = binary.charCodeAt(offset + 1);
+      const length = this.readUInt16BE(binary, offset + 2);
+      if (length < 2)
+        return null;
+      if (marker >= 192 && marker <= 195) {
+        return {
+          height: this.readUInt16BE(binary, offset + 5),
+          width: this.readUInt16BE(binary, offset + 7)
+        };
+      }
+      offset += 2 + length;
+    }
+    return null;
   }
   renderPreview(cards, settings, template) {
     const doc = document.implementation.createHTMLDocument("");
