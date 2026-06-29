@@ -186,6 +186,8 @@ X 不能像公众号一样稳定接收剪贴板里的本地图片，所以插件
 
 [创作者 AI 课：用 AI 杠杆、代码杠杆、媒体杠杆，重塑内容创作生产体系](https://mp.weixin.qq.com/s/x924y3O9-nWda5OTHArKKg)
 
+<img src="assets/creator-ai-course-qr.png" alt="Jacky 创作者 AI 俱乐部课程二维码" width="360">
+
 ## 开发
 
 ```bash
@@ -212,5 +214,3 @@ npm run deploy
 ## License
 
 Jacky-mdflow 的代码以 [GNU Affero General Public License v3.0](LICENSE) 授权。
-
-仓库中的品牌名称、课程资料、宣传文案、截图、图片素材和社群引导内容不包含在代码开源授权范围内，除非另有说明。
