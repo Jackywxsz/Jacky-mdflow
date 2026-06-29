@@ -61,6 +61,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   readonly id = 'rednote';
   readonly name = '小红书';
   readonly icon = '📕';
+  private previewPageIndex = 0;
 
   constructor(
     private imageResolver: ImageResolver,
@@ -134,9 +135,10 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       return;
     }
 
-    let currentIndex = 0;
+    let currentIndex = Math.min(this.previewPageIndex, sections.length - 1);
 
     const updateNavigation = () => {
+      this.previewPageIndex = currentIndex;
       this.updatePreviewState(wrapper, currentIndex);
       indicator.textContent = `${currentIndex + 1}/${sections.length}`;
       prevButton.classList.toggle('red-nav-hidden', currentIndex === 0);
@@ -472,13 +474,36 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     const appendNode = (node: Element) => {
       const safeNodes = this.splitOversizedNode(node, currentPageTitle, measurer, settings);
 
-      safeNodes.forEach((safeNode) => {
+      for (let index = 0; index < safeNodes.length; index += 1) {
+        const safeNode = safeNodes[index];
+
         if (currentNodes.length > 0 && !measurer.canFit(currentPageTitle, [...currentNodes, safeNode])) {
+          const remainingSpaceNodes = this.splitNodeForRemainingSpace(
+            safeNode,
+            currentPageTitle,
+            currentNodes,
+            measurer,
+            settings
+          );
+
+          if (remainingSpaceNodes.length > 1 && measurer.canFit(currentPageTitle, [...currentNodes, remainingSpaceNodes[0]])) {
+            currentNodes.push(remainingSpaceNodes[0]);
+            flush();
+            safeNodes.splice(index, 1, ...remainingSpaceNodes.slice(1));
+            index -= 1;
+            continue;
+          }
+
+          if (remainingSpaceNodes.length === 1 && remainingSpaceNodes[0] !== safeNode && measurer.canFit(currentPageTitle, [...currentNodes, remainingSpaceNodes[0]])) {
+            currentNodes.push(remainingSpaceNodes[0]);
+            continue;
+          }
+
           flush();
         }
 
         currentNodes.push(safeNode);
-      });
+      }
     };
 
     try {
@@ -645,11 +670,83 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
         return;
       }
 
+      if (image.style.height && image.style.height !== 'auto') {
+        return;
+      }
+
       image.style.width = '100%';
       image.style.height = 'auto';
       image.style.aspectRatio = '16 / 9';
       image.style.objectFit = 'cover';
     });
+  }
+
+  private splitNodeForRemainingSpace(
+    node: Element,
+    title: string,
+    currentNodes: Element[],
+    measurer: PageMeasurer,
+    settings: RedNoteSettings
+  ): Element[] {
+    const tag = node.tagName.toLowerCase();
+
+    if (tag === 'img') {
+      return this.fitImageToRemainingSpace(node, title, currentNodes, measurer);
+    }
+
+    if (['p', 'blockquote'].includes(tag)) {
+      return this.splitTextBlockForRemainingSpace(node, title, currentNodes, measurer, settings);
+    }
+
+    return [node];
+  }
+
+  private fitImageToRemainingSpace(
+    node: Element,
+    title: string,
+    currentNodes: Element[],
+    measurer: PageMeasurer
+  ): Element[] {
+    const heights = [260, 220, 180, 140];
+
+    for (const height of heights) {
+      const candidate = node.cloneNode(true) as HTMLElement;
+      candidate.classList.add('red-image-inline-fit');
+      candidate.style.setProperty('height', `${height}px`, 'important');
+      candidate.style.setProperty('max-height', `${height}px`, 'important');
+      candidate.style.setProperty('object-fit', 'contain', 'important');
+
+      if (measurer.canFit(title, [...currentNodes, candidate])) {
+        return [candidate];
+      }
+    }
+
+    return [node];
+  }
+
+  private splitTextBlockForRemainingSpace(
+    node: Element,
+    title: string,
+    currentNodes: Element[],
+    measurer: PageMeasurer,
+    settings: RedNoteSettings
+  ): Element[] {
+    let maxChars = Math.max(18, Math.floor(this.getMaxTextBlockChars(settings) / 2));
+
+    while (maxChars >= 18) {
+      const chunks = this.splitTextBlock(node, maxChars);
+      if (
+        chunks.length > 1 &&
+        measurer.canFit(title, [...currentNodes, chunks[0]]) &&
+        chunks.every((chunk) => measurer.canFit(title, [chunk]))
+      ) {
+        return chunks;
+      }
+
+      maxChars = Math.floor(maxChars * 0.7);
+    }
+
+    return [node];
   }
 
   private splitOversizedNode(

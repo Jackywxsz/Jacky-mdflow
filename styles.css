@@ -904,6 +904,11 @@
   height: 300px;
 }
 
+.red-image-inline-fit {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
 .red-blockquote {
   padding: 12px 14px;
   border-radius: 14px;

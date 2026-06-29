@@ -4813,6 +4813,7 @@ var RedNoteExporter = class {
     this.id = "rednote";
     this.name = "\u5C0F\u7EA2\u4E66";
     this.icon = "\u{1F4D5}";
+    this.previewPageIndex = 0;
   }
   async prepare(renderedHtml, context) {
     const settings = this.redNoteSettings.getSettings();
@@ -4863,8 +4864,9 @@ var RedNoteExporter = class {
     if (!imagePreview || !prevButton || !nextButton || !indicator || sections.length === 0) {
       return;
     }
-    let currentIndex = 0;
+    let currentIndex = Math.min(this.previewPageIndex, sections.length - 1);
     const updateNavigation = () => {
+      this.previewPageIndex = currentIndex;
       this.updatePreviewState(wrapper, currentIndex);
       indicator.textContent = `${currentIndex + 1}/${sections.length}`;
       prevButton.classList.toggle("red-nav-hidden", currentIndex === 0);
@@ -5116,12 +5118,31 @@ var RedNoteExporter = class {
     };
     const appendNode = (node) => {
       const safeNodes = this.splitOversizedNode(node, currentPageTitle, measurer, settings);
-      safeNodes.forEach((safeNode) => {
+      for (let index = 0; index < safeNodes.length; index += 1) {
+        const safeNode = safeNodes[index];
         if (currentNodes.length > 0 && !measurer.canFit(currentPageTitle, [...currentNodes, safeNode])) {
+          const remainingSpaceNodes = this.splitNodeForRemainingSpace(
+            safeNode,
+            currentPageTitle,
+            currentNodes,
+            measurer,
+            settings
+          );
+          if (remainingSpaceNodes.length > 1 && measurer.canFit(currentPageTitle, [...currentNodes, remainingSpaceNodes[0]])) {
+            currentNodes.push(remainingSpaceNodes[0]);
+            flush();
+            safeNodes.splice(index, 1, ...remainingSpaceNodes.slice(1));
+            index -= 1;
+            continue;
+          }
+          if (remainingSpaceNodes.length === 1 && remainingSpaceNodes[0] !== safeNode && measurer.canFit(currentPageTitle, [...currentNodes, remainingSpaceNodes[0]])) {
+            currentNodes.push(remainingSpaceNodes[0]);
+            continue;
+          }
           flush();
         }
         currentNodes.push(safeNode);
-      });
+      }
     };
     try {
       normalizedEntries.forEach((entry) => {
@@ -5252,11 +5273,49 @@ var RedNoteExporter = class {
       if (image.complete && image.naturalWidth > 0) {
         return;
       }
+      if (image.style.height && image.style.height !== "auto") {
+        return;
+      }
       image.style.width = "100%";
       image.style.height = "auto";
       image.style.aspectRatio = "16 / 9";
       image.style.objectFit = "cover";
     });
+  }
+  splitNodeForRemainingSpace(node, title, currentNodes, measurer, settings) {
+    const tag = node.tagName.toLowerCase();
+    if (tag === "img") {
+      return this.fitImageToRemainingSpace(node, title, currentNodes, measurer);
+    }
+    if (["p", "blockquote"].includes(tag)) {
+      return this.splitTextBlockForRemainingSpace(node, title, currentNodes, measurer, settings);
+    }
+    return [node];
+  }
+  fitImageToRemainingSpace(node, title, currentNodes, measurer) {
+    const heights = [260, 220, 180, 140];
+    for (const height of heights) {
+      const candidate = node.cloneNode(true);
+      candidate.classList.add("red-image-inline-fit");
+      candidate.style.setProperty("height", `${height}px`, "important");
+      candidate.style.setProperty("max-height", `${height}px`, "important");
+      candidate.style.setProperty("object-fit", "contain", "important");
+      if (measurer.canFit(title, [...currentNodes, candidate])) {
+        return [candidate];
+      }
+    }
+    return [node];
+  }
+  splitTextBlockForRemainingSpace(node, title, currentNodes, measurer, settings) {
+    let maxChars = Math.max(18, Math.floor(this.getMaxTextBlockChars(settings) / 2));
+    while (maxChars >= 18) {
+      const chunks = this.splitTextBlock(node, maxChars);
+      if (chunks.length > 1 && measurer.canFit(title, [...currentNodes, chunks[0]]) && chunks.every((chunk) => measurer.canFit(title, [chunk]))) {
+        return chunks;
+      }
+      maxChars = Math.floor(maxChars * 0.7);
+    }
+    return [node];
   }
   splitOversizedNode(node, title, measurer, settings) {
     if (measurer.canFit(title, [node])) {
