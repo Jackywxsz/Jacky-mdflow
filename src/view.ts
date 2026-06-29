@@ -14,7 +14,7 @@ import {
 import { RedNoteSettingsManager } from './rednote/settings-manager';
 import { RedNoteAboutModal } from './rednote/about-modal';
 import { getRedNoteTemplateOptions } from './rednote/template-presets';
-import { clampRedNoteFontSize, RedNoteAssetField } from './rednote/types';
+import { clampRedNoteFontSize, REDNOTE_LAYOUT_MODE_OPTIONS, RedNoteAssetField } from './rednote/types';
 
 export const VIEW_TYPE_MDFLOW = 'mdflow-publisher-view';
 
@@ -37,6 +37,7 @@ export class MDFlowView extends ItemView {
   private redNoteControlsEl!: HTMLElement;
   private redNoteBottomBarEl!: HTMLElement;
   private globalBottomBarEl!: HTMLElement;
+  private redNoteLayoutModeSelectEl!: HTMLSelectElement;
   private redNoteTemplateSelectEl!: HTMLSelectElement;
   private redNoteFontSelectEl!: HTMLSelectElement;
   private redNoteFontSizeInputEl!: HTMLInputElement;
@@ -144,6 +145,15 @@ export class MDFlowView extends ItemView {
 
     const controlsRow = container.createDiv({ cls: 'mdflow-rednote-controls-row' });
 
+    this.redNoteLayoutModeSelectEl = this.createControlSelect(
+      controlsRow,
+      '排版',
+      REDNOTE_LAYOUT_MODE_OPTIONS,
+      async (value) => {
+        await this.redNoteSettings.update({ layoutMode: value === 'obsidian-flow' ? value : 'heading-sections' });
+      }
+    );
+
     this.redNoteTemplateSelectEl = this.createControlSelect(
       controlsRow,
       '模板',
@@ -241,12 +251,12 @@ export class MDFlowView extends ItemView {
       <div class="mdflow-rn-guide-title">使用指南</div>
       <div class="mdflow-rn-guide-content">
         <div class="mdflow-rn-guide-item">1. <b>核心用法</b>：用二级标题(##)标记分节，内容会自动排满页面</div>
-        <div class="mdflow-rn-guide-item">2. <b>内容分页</b>：需要固定换页时使用 ---，否则会根据文字、图片和代码块自动分页</div>
-        <div class="mdflow-rn-guide-item">3. <b>首图制作</b>：单独调整首节字号至 20-24px，使用【下载当前页】导出</div>
-        <div class="mdflow-rn-guide-item">4. <b>长文优化</b>：内容较多的章节可调小字号至 14-16px 后单独导出</div>
-        <div class="mdflow-rn-guide-item">5. <b>批量操作</b>：保持统一字号时，用【导出全部页】批量生成</div>
-        <div class="mdflow-rn-guide-item">6. <b>模板切换</b>：顶部选择器可切换不同视觉风格</div>
-        <div class="mdflow-rn-guide-item">7. <b>支持创作</b>：点击 ❤️ 关于作者可进行打赏支持</div>
+        <div class="mdflow-rn-guide-item">2. <b>排版模式</b>：切到正文卡片流后，二级标题会作为正文小标题，不再强制分页</div>
+        <div class="mdflow-rn-guide-item">3. <b>内容分页</b>：需要固定换页时使用 ---，否则会根据文字、图片和代码块自动分页</div>
+        <div class="mdflow-rn-guide-item">4. <b>首图制作</b>：单独调整首节字号至 20-24px，使用【下载当前页】导出</div>
+        <div class="mdflow-rn-guide-item">5. <b>长文优化</b>：内容较多的章节可调小字号至 14-16px 后单独导出</div>
+        <div class="mdflow-rn-guide-item">6. <b>批量操作</b>：保持统一字号时，用【导出全部页】批量生成</div>
+        <div class="mdflow-rn-guide-item">7. <b>模板切换</b>：顶部选择器可切换不同视觉风格</div>
       </div>
     `;
 
@@ -452,6 +462,7 @@ export class MDFlowView extends ItemView {
     const settings = this.redNoteSettings.getSettings();
     const template = this.redNoteSettings.getTemplate(settings.templateId);
 
+    this.redNoteLayoutModeSelectEl.value = settings.layoutMode;
     this.redNoteTemplateSelectEl.value = settings.templateId;
     this.redNoteFontSizeInputEl.value = String(settings.fontSize);
     this.redNoteCoverUploadBtnEl.style.display = template.showCover ? '' : 'none';

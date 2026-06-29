@@ -110,10 +110,14 @@ export class RedNoteSettingsManager extends Events {
     const fontFamily = fontOptions.has(merged.fontFamily)
       ? merged.fontFamily
       : DEFAULT_REDNOTE_SETTINGS.fontFamily;
+    const layoutMode = merged.layoutMode === 'obsidian-flow'
+      ? merged.layoutMode
+      : DEFAULT_REDNOTE_SETTINGS.layoutMode;
 
     return {
       ...merged,
       templateId,
+      layoutMode,
       fontFamily,
       fontSize: clampRedNoteFontSize(merged.fontSize),
       customFonts: Array.from(fontOptions.values()),

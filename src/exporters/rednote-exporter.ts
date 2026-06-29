@@ -249,7 +249,10 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   ): Promise<RedNoteCard[]> {
     const metadata = context.app.metadataCache.getFileCache(context.sourceFile)?.frontmatter || {};
     const title = this.pickDocumentTitle(doc, context, metadata);
-    const sections = this.extractSections(doc, title, 'h2');
+    const isObsidianFlow = settings.layoutMode === 'obsidian-flow';
+    const sections = isObsidianFlow
+      ? [{ title, nodes: this.extractObsidianFlowNodes(doc, title) }]
+      : this.extractSections(doc, title, 'h2');
     const summary =
       this.pickSummary(metadata) ||
       this.buildSummary(sections) ||
@@ -258,7 +261,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const cards: RedNoteCard[] = [];
 
-    if (template.showCover) {
+    if (template.showCover && !isObsidianFlow) {
       cards.push({
         kind: 'cover',
         title,
@@ -379,6 +382,16 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     }
 
     return sections;
+  }
+
+  private extractObsidianFlowNodes(doc: Document, fallbackTitle: string): Element[] {
+    return Array.from(doc.body.children)
+      .filter((child, index) => {
+        const tag = child.tagName.toLowerCase();
+        const text = child.textContent?.trim() || '';
+        return !(index === 0 && ['h1', 'h2', 'h3'].includes(tag) && text === fallbackTitle);
+      })
+      .map((child) => child.cloneNode(true) as Element);
   }
 
   private buildSummary(sections: Array<{ title: string; nodes: Element[] }>): string {
@@ -530,6 +543,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     const imagePreview = document.createElement('div');
     imagePreview.className = 'red-image-preview';
     imagePreview.setAttribute('data-template-id', template.id);
+    imagePreview.setAttribute('data-rednote-layout', settings.layoutMode);
     imagePreview.setAttribute('style', this.buildPreviewStyle(settings, template));
     imagePreview.style.width = '450px';
     imagePreview.style.maxWidth = 'none';
@@ -594,7 +608,22 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     this.reserveImageSlotsForMeasure(section);
 
     if (!shell || !title || !body) {
-      return imagePreview.scrollHeight <= imagePreview.clientHeight + tolerance;
+      const flowShell = section.querySelector('.mdflow-rednote-flow-shell') as HTMLElement | null;
+      const flowBody = section.querySelector('.mdflow-rednote-flow-body') as HTMLElement | null;
+
+      if (!flowShell || !flowBody) {
+        return imagePreview.scrollHeight <= imagePreview.clientHeight + tolerance;
+      }
+
+      const shellStyle = window.getComputedStyle(flowShell);
+      const shellPaddingBottom = Number.parseFloat(shellStyle.paddingBottom || '0') || 0;
+      const shellLimit = flowShell.getBoundingClientRect().bottom - shellPaddingBottom;
+      const bodyLastChild = flowBody.lastElementChild as HTMLElement | null;
+      const bodyBottom = bodyLastChild
+        ? bodyLastChild.getBoundingClientRect().bottom
+        : flowBody.getBoundingClientRect().bottom;
+
+      return bodyBottom <= shellLimit + tolerance;
     }
 
     const shellStyle = window.getComputedStyle(shell);
@@ -1066,6 +1095,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     const imagePreview = doc.createElement('div');
     imagePreview.className = 'red-image-preview';
     imagePreview.setAttribute('data-template-id', template.id);
+    imagePreview.setAttribute('data-rednote-layout', settings.layoutMode);
     imagePreview.setAttribute('style', this.buildPreviewStyle(settings, template));
 
     const header = doc.createElement('div');
@@ -1196,6 +1226,14 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   }
 
   private renderContentSection(card: RedNoteCard, settings: RedNoteSettings): string {
+    if (settings.layoutMode === 'obsidian-flow') {
+      return `
+        <div class="mdflow-rednote-flow-shell">
+          <div class="mdflow-rednote-flow-body">${card.bodyHtml || ''}</div>
+        </div>
+      `;
+    }
+
     return `
       <div class="mdflow-rednote-section-shell">
         <h2 class="mdflow-rednote-section-title">${this.escapeHtml(card.title)}</h2>

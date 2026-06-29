@@ -4958,11 +4958,12 @@ var RedNoteExporter = class {
     var _a;
     const metadata = ((_a = context.app.metadataCache.getFileCache(context.sourceFile)) == null ? void 0 : _a.frontmatter) || {};
     const title = this.pickDocumentTitle(doc, context, metadata);
-    const sections = this.extractSections(doc, title, "h2");
+    const isObsidianFlow = settings.layoutMode === "obsidian-flow";
+    const sections = isObsidianFlow ? [{ title, nodes: this.extractObsidianFlowNodes(doc, title) }] : this.extractSections(doc, title, "h2");
     const summary = this.pickSummary(metadata) || this.buildSummary(sections) || "\u5728 Obsidian \u4E2D\u5B8C\u6210\u5199\u4F5C\u3001\u6392\u7248\u4E0E\u5206\u53D1\u3002";
     const coverImageSrc = await this.pickCoverImage(doc, context, metadata, settings);
     const cards = [];
-    if (template.showCover) {
+    if (template.showCover && !isObsidianFlow) {
       cards.push({
         kind: "cover",
         title,
@@ -5048,6 +5049,14 @@ var RedNoteExporter = class {
       sections.push({ title: currentTitle, nodes: [] });
     }
     return sections;
+  }
+  extractObsidianFlowNodes(doc, fallbackTitle) {
+    return Array.from(doc.body.children).filter((child, index) => {
+      var _a;
+      const tag = child.tagName.toLowerCase();
+      const text = ((_a = child.textContent) == null ? void 0 : _a.trim()) || "";
+      return !(index === 0 && ["h1", "h2", "h3"].includes(tag) && text === fallbackTitle);
+    }).map((child) => child.cloneNode(true));
   }
   buildSummary(sections) {
     const text = sections.flatMap((section) => section.nodes).map((node) => {
@@ -5164,6 +5173,7 @@ var RedNoteExporter = class {
     const imagePreview = document.createElement("div");
     imagePreview.className = "red-image-preview";
     imagePreview.setAttribute("data-template-id", template.id);
+    imagePreview.setAttribute("data-rednote-layout", settings.layoutMode);
     imagePreview.setAttribute("style", this.buildPreviewStyle(settings, template));
     imagePreview.style.width = "450px";
     imagePreview.style.maxWidth = "none";
@@ -5216,7 +5226,17 @@ var RedNoteExporter = class {
     const tolerance = 0;
     this.reserveImageSlotsForMeasure(section);
     if (!shell || !title || !body) {
-      return imagePreview.scrollHeight <= imagePreview.clientHeight + tolerance;
+      const flowShell = section.querySelector(".mdflow-rednote-flow-shell");
+      const flowBody = section.querySelector(".mdflow-rednote-flow-body");
+      if (!flowShell || !flowBody) {
+        return imagePreview.scrollHeight <= imagePreview.clientHeight + tolerance;
+      }
+      const shellStyle2 = window.getComputedStyle(flowShell);
+      const shellPaddingBottom2 = Number.parseFloat(shellStyle2.paddingBottom || "0") || 0;
+      const shellLimit2 = flowShell.getBoundingClientRect().bottom - shellPaddingBottom2;
+      const bodyLastChild2 = flowBody.lastElementChild;
+      const bodyBottom2 = bodyLastChild2 ? bodyLastChild2.getBoundingClientRect().bottom : flowBody.getBoundingClientRect().bottom;
+      return bodyBottom2 <= shellLimit2 + tolerance;
     }
     const shellStyle = window.getComputedStyle(shell);
     const shellPaddingBottom = Number.parseFloat(shellStyle.paddingBottom || "0") || 0;
@@ -5568,6 +5588,7 @@ var RedNoteExporter = class {
     const imagePreview = doc.createElement("div");
     imagePreview.className = "red-image-preview";
     imagePreview.setAttribute("data-template-id", template.id);
+    imagePreview.setAttribute("data-rednote-layout", settings.layoutMode);
     imagePreview.setAttribute("style", this.buildPreviewStyle(settings, template));
     const header = doc.createElement("div");
     header.className = "red-preview-header";
@@ -5672,6 +5693,13 @@ var RedNoteExporter = class {
     `;
   }
   renderContentSection(card, settings) {
+    if (settings.layoutMode === "obsidian-flow") {
+      return `
+        <div class="mdflow-rednote-flow-shell">
+          <div class="mdflow-rednote-flow-body">${card.bodyHtml || ""}</div>
+        </div>
+      `;
+    }
     return `
       <div class="mdflow-rednote-section-shell">
         <h2 class="mdflow-rednote-section-title">${this.escapeHtml(card.title)}</h2>
@@ -6463,8 +6491,19 @@ var REDNOTE_FONT_OPTIONS = [
     isPreset: true
   }
 ];
+var REDNOTE_LAYOUT_MODE_OPTIONS = [
+  {
+    label: "\u4E8C\u7EA7\u6807\u9898\u5206\u9875",
+    value: "heading-sections"
+  },
+  {
+    label: "\u6B63\u6587\u5361\u7247\u6D41",
+    value: "obsidian-flow"
+  }
+];
 var DEFAULT_REDNOTE_SETTINGS = {
   templateId: "jacky-cover",
+  layoutMode: "heading-sections",
   fontFamily: REDNOTE_FONT_OPTIONS[0].value,
   fontSize: 16,
   userAvatar: "",
@@ -6581,6 +6620,14 @@ var MDFlowView = class extends import_obsidian6.ItemView {
   renderRedNoteControls(container) {
     container.empty();
     const controlsRow = container.createDiv({ cls: "mdflow-rednote-controls-row" });
+    this.redNoteLayoutModeSelectEl = this.createControlSelect(
+      controlsRow,
+      "\u6392\u7248",
+      REDNOTE_LAYOUT_MODE_OPTIONS,
+      async (value) => {
+        await this.redNoteSettings.update({ layoutMode: value === "obsidian-flow" ? value : "heading-sections" });
+      }
+    );
     this.redNoteTemplateSelectEl = this.createControlSelect(
       controlsRow,
       "\u6A21\u677F",
@@ -6665,12 +6712,12 @@ var MDFlowView = class extends import_obsidian6.ItemView {
       <div class="mdflow-rn-guide-title">\u4F7F\u7528\u6307\u5357</div>
       <div class="mdflow-rn-guide-content">
         <div class="mdflow-rn-guide-item">1. <b>\u6838\u5FC3\u7528\u6CD5</b>\uFF1A\u7528\u4E8C\u7EA7\u6807\u9898(##)\u6807\u8BB0\u5206\u8282\uFF0C\u5185\u5BB9\u4F1A\u81EA\u52A8\u6392\u6EE1\u9875\u9762</div>
-        <div class="mdflow-rn-guide-item">2. <b>\u5185\u5BB9\u5206\u9875</b>\uFF1A\u9700\u8981\u56FA\u5B9A\u6362\u9875\u65F6\u4F7F\u7528 ---\uFF0C\u5426\u5219\u4F1A\u6839\u636E\u6587\u5B57\u3001\u56FE\u7247\u548C\u4EE3\u7801\u5757\u81EA\u52A8\u5206\u9875</div>
-        <div class="mdflow-rn-guide-item">3. <b>\u9996\u56FE\u5236\u4F5C</b>\uFF1A\u5355\u72EC\u8C03\u6574\u9996\u8282\u5B57\u53F7\u81F3 20-24px\uFF0C\u4F7F\u7528\u3010\u4E0B\u8F7D\u5F53\u524D\u9875\u3011\u5BFC\u51FA</div>
-        <div class="mdflow-rn-guide-item">4. <b>\u957F\u6587\u4F18\u5316</b>\uFF1A\u5185\u5BB9\u8F83\u591A\u7684\u7AE0\u8282\u53EF\u8C03\u5C0F\u5B57\u53F7\u81F3 14-16px \u540E\u5355\u72EC\u5BFC\u51FA</div>
-        <div class="mdflow-rn-guide-item">5. <b>\u6279\u91CF\u64CD\u4F5C</b>\uFF1A\u4FDD\u6301\u7EDF\u4E00\u5B57\u53F7\u65F6\uFF0C\u7528\u3010\u5BFC\u51FA\u5168\u90E8\u9875\u3011\u6279\u91CF\u751F\u6210</div>
-        <div class="mdflow-rn-guide-item">6. <b>\u6A21\u677F\u5207\u6362</b>\uFF1A\u9876\u90E8\u9009\u62E9\u5668\u53EF\u5207\u6362\u4E0D\u540C\u89C6\u89C9\u98CE\u683C</div>
-        <div class="mdflow-rn-guide-item">7. <b>\u652F\u6301\u521B\u4F5C</b>\uFF1A\u70B9\u51FB \u2764\uFE0F \u5173\u4E8E\u4F5C\u8005\u53EF\u8FDB\u884C\u6253\u8D4F\u652F\u6301</div>
+        <div class="mdflow-rn-guide-item">2. <b>\u6392\u7248\u6A21\u5F0F</b>\uFF1A\u5207\u5230\u6B63\u6587\u5361\u7247\u6D41\u540E\uFF0C\u4E8C\u7EA7\u6807\u9898\u4F1A\u4F5C\u4E3A\u6B63\u6587\u5C0F\u6807\u9898\uFF0C\u4E0D\u518D\u5F3A\u5236\u5206\u9875</div>
+        <div class="mdflow-rn-guide-item">3. <b>\u5185\u5BB9\u5206\u9875</b>\uFF1A\u9700\u8981\u56FA\u5B9A\u6362\u9875\u65F6\u4F7F\u7528 ---\uFF0C\u5426\u5219\u4F1A\u6839\u636E\u6587\u5B57\u3001\u56FE\u7247\u548C\u4EE3\u7801\u5757\u81EA\u52A8\u5206\u9875</div>
+        <div class="mdflow-rn-guide-item">4. <b>\u9996\u56FE\u5236\u4F5C</b>\uFF1A\u5355\u72EC\u8C03\u6574\u9996\u8282\u5B57\u53F7\u81F3 20-24px\uFF0C\u4F7F\u7528\u3010\u4E0B\u8F7D\u5F53\u524D\u9875\u3011\u5BFC\u51FA</div>
+        <div class="mdflow-rn-guide-item">5. <b>\u957F\u6587\u4F18\u5316</b>\uFF1A\u5185\u5BB9\u8F83\u591A\u7684\u7AE0\u8282\u53EF\u8C03\u5C0F\u5B57\u53F7\u81F3 14-16px \u540E\u5355\u72EC\u5BFC\u51FA</div>
+        <div class="mdflow-rn-guide-item">6. <b>\u6279\u91CF\u64CD\u4F5C</b>\uFF1A\u4FDD\u6301\u7EDF\u4E00\u5B57\u53F7\u65F6\uFF0C\u7528\u3010\u5BFC\u51FA\u5168\u90E8\u9875\u3011\u6279\u91CF\u751F\u6210</div>
+        <div class="mdflow-rn-guide-item">7. <b>\u6A21\u677F\u5207\u6362</b>\uFF1A\u9876\u90E8\u9009\u62E9\u5668\u53EF\u5207\u6362\u4E0D\u540C\u89C6\u89C9\u98CE\u683C</div>
       </div>
     `;
     const bar = this.globalBottomBarEl;
@@ -6838,6 +6885,7 @@ var MDFlowView = class extends import_obsidian6.ItemView {
   syncRedNoteControls() {
     const settings = this.redNoteSettings.getSettings();
     const template = this.redNoteSettings.getTemplate(settings.templateId);
+    this.redNoteLayoutModeSelectEl.value = settings.layoutMode;
     this.redNoteTemplateSelectEl.value = settings.templateId;
     this.redNoteFontSizeInputEl.value = String(settings.fontSize);
     this.redNoteCoverUploadBtnEl.style.display = template.showCover ? "" : "none";
@@ -7138,9 +7186,11 @@ var RedNoteSettingsManager = class extends import_obsidian7.Events {
       fontOptions.set(font.value, font);
     });
     const fontFamily = fontOptions.has(merged.fontFamily) ? merged.fontFamily : DEFAULT_REDNOTE_SETTINGS.fontFamily;
+    const layoutMode = merged.layoutMode === "obsidian-flow" ? merged.layoutMode : DEFAULT_REDNOTE_SETTINGS.layoutMode;
     return {
       ...merged,
       templateId,
+      layoutMode,
       fontFamily,
       fontSize: clampRedNoteFontSize(merged.fontSize),
       customFonts: Array.from(fontOptions.values())
@@ -7166,6 +7216,15 @@ var MDFlowSettingTab = class extends import_obsidian8.PluginSettingTab {
       text: "\u8FD9\u91CC\u7BA1\u7406\u5C0F\u7EA2\u4E66\u6A21\u677F\u3001\u8D26\u53F7\u4FE1\u606F\u548C\u5BFC\u6D41\u7D20\u6750\u3002\u9876\u90E8\u5DE5\u5177\u680F\u8D1F\u8D23\u5FEB\u901F\u5207\u6362\uFF0C\u8BBE\u7F6E\u9875\u8D1F\u8D23\u957F\u671F\u4FDD\u5B58\u3002"
     });
     containerEl.createEl("h3", { text: "\u6A21\u677F\u4E0E\u6392\u7248" });
+    new import_obsidian8.Setting(containerEl).setName("\u9ED8\u8BA4\u6392\u7248").setDesc("\u4E8C\u7EA7\u6807\u9898\u5206\u9875\u9002\u5408\u7AE0\u8282\u5361\u7247\uFF0C\u6B63\u6587\u5361\u7247\u6D41\u9002\u5408\u6B63\u6587\u8FDE\u7EED\u6392\u7248").addDropdown((dropdown) => {
+      REDNOTE_LAYOUT_MODE_OPTIONS.forEach((option) => dropdown.addOption(option.value, option.label));
+      dropdown.setValue(settings.layoutMode);
+      dropdown.onChange(async (value) => {
+        await this.redNoteSettings.update({
+          layoutMode: value === "obsidian-flow" ? value : "heading-sections"
+        });
+      });
+    });
     new import_obsidian8.Setting(containerEl).setName("\u9ED8\u8BA4\u6A21\u677F").setDesc("\u5207\u6362\u5C0F\u7EA2\u4E66\u56FE\u6587\u7684\u6574\u4F53\u89C6\u89C9\u98CE\u683C").addDropdown((dropdown) => {
       getRedNoteTemplateOptions().forEach((option) => dropdown.addOption(option.value, option.label));
       dropdown.setValue(settings.templateId);

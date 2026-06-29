@@ -571,6 +571,66 @@
   margin: 6px 0;
 }
 
+.red-image-preview[data-rednote-layout="obsidian-flow"] {
+  padding: 18px;
+}
+
+.mdflow-rednote-flow-shell {
+  height: 100%;
+  padding: 4px 2px 6px;
+  box-sizing: border-box;
+  color: var(--rn-body-color);
+}
+
+.mdflow-rednote-flow-body {
+  height: 100%;
+  padding: 18px 18px 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--rn-frame-border);
+  border-radius: 18px;
+  background: var(--rn-panel-bg);
+  color: var(--rn-body-color);
+  font-size: var(--rn-base-font-size);
+  line-height: 1.7;
+  overflow: hidden;
+}
+
+.mdflow-rednote-flow-body > *:first-child {
+  margin-top: 0;
+}
+
+.mdflow-rednote-flow-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.mdflow-rednote-flow-body p,
+.mdflow-rednote-flow-body ul,
+.mdflow-rednote-flow-body ol,
+.mdflow-rednote-flow-body blockquote,
+.mdflow-rednote-flow-body pre,
+.mdflow-rednote-flow-body table {
+  margin: 0 0 10px;
+}
+
+.mdflow-rednote-flow-body h1,
+.mdflow-rednote-flow-body h2,
+.mdflow-rednote-flow-body h3 {
+  margin: 14px 0 8px;
+  color: var(--rn-heading-color);
+  font-size: calc(var(--rn-base-font-size) + 2px);
+  line-height: 1.32;
+  font-weight: 850;
+}
+
+.mdflow-rednote-flow-body ul,
+.mdflow-rednote-flow-body ol {
+  padding-left: 20px;
+}
+
+.mdflow-rednote-flow-body li {
+  margin: 5px 0;
+}
+
 .jacky-cover-section {
   padding: 0 !important;
   margin: 0 !important;

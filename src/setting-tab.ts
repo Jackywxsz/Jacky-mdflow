@@ -1,7 +1,7 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import { RedNoteSettingsManager } from './rednote/settings-manager';
 import { getRedNoteTemplateOptions } from './rednote/template-presets';
-import { clampRedNoteFontSize, RedNoteAssetField } from './rednote/types';
+import { clampRedNoteFontSize, REDNOTE_LAYOUT_MODE_OPTIONS, RedNoteAssetField } from './rednote/types';
 import MDFlowPlugin from './main';
 
 export class MDFlowSettingTab extends PluginSettingTab {
@@ -25,6 +25,19 @@ export class MDFlowSettingTab extends PluginSettingTab {
     });
 
     containerEl.createEl('h3', { text: '模板与排版' });
+
+    new Setting(containerEl)
+      .setName('默认排版')
+      .setDesc('二级标题分页适合章节卡片，正文卡片流适合正文连续排版')
+      .addDropdown((dropdown) => {
+        REDNOTE_LAYOUT_MODE_OPTIONS.forEach((option) => dropdown.addOption(option.value, option.label));
+        dropdown.setValue(settings.layoutMode);
+        dropdown.onChange(async (value) => {
+          await this.redNoteSettings.update({
+            layoutMode: value === 'obsidian-flow' ? value : 'heading-sections',
+          });
+        });
+      });
 
     new Setting(containerEl)
       .setName('默认模板')

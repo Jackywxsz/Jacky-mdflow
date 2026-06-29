@@ -12,8 +12,16 @@ export interface RedNoteTemplatePreset {
   variables: Record<string, string>;
 }
 
+export type RedNoteLayoutMode = 'heading-sections' | 'obsidian-flow';
+
+export interface RedNoteLayoutModeOption {
+  label: string;
+  value: RedNoteLayoutMode;
+}
+
 export interface RedNoteSettings {
   templateId: string;
+  layoutMode: RedNoteLayoutMode;
   fontFamily: string;
   fontSize: number;
   userAvatar: string;
@@ -81,8 +89,20 @@ export const REDNOTE_FONT_OPTIONS: RedNoteFontOption[] = [
   },
 ];
 
+export const REDNOTE_LAYOUT_MODE_OPTIONS: RedNoteLayoutModeOption[] = [
+  {
+    label: '二级标题分页',
+    value: 'heading-sections',
+  },
+  {
+    label: '正文卡片流',
+    value: 'obsidian-flow',
+  },
+];
+
 export const DEFAULT_REDNOTE_SETTINGS: RedNoteSettings = {
   templateId: 'jacky-cover',
+  layoutMode: 'heading-sections',
   fontFamily: REDNOTE_FONT_OPTIONS[0].value,
   fontSize: 16,
   userAvatar: '',
