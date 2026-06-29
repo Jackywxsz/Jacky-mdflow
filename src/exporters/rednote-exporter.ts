@@ -753,6 +753,10 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     for (let index = 0; index < text.length; index += maxChars) {
       const clone = node.cloneNode(false) as Element;
+      clone.classList.add('red-text-fragment');
+      if (index > 0) {
+        clone.classList.add('red-text-continuation');
+      }
       clone.textContent = text.slice(index, index + maxChars);
       chunks.push(clone);
     }
@@ -764,8 +768,6 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     entries: PaginationEntry[],
     settings: RedNoteSettings
   ): PaginationEntry[] {
-    const maxChars = this.getMaxTextBlockChars(settings);
-
     return entries.flatMap((entry) => {
       if (!entry.node || entry.forceBreakBefore || entry.sectionTitle) {
         return [entry];
@@ -785,16 +787,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
         return this.splitPreBlock(node, settings).map((splitNode) => ({ node: splitNode }));
       }
 
-      if (!['p', 'blockquote'].includes(tag)) {
-        return [entry];
-      }
-
-      const textLength = node.textContent?.trim().length || 0;
-      if (textLength <= maxChars) {
-        return [entry];
-      }
-
-      return this.splitTextBlock(node, maxChars).map((splitNode) => ({ node: splitNode }));
+      return [entry];
     });
   }
 
@@ -915,11 +908,15 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     }
 
     return this.getTextChunkRanges(fullText, maxChars)
-      .map(({ start, end }) => {
+      .map(({ start, end }, index) => {
         const range = node.ownerDocument.createRange();
         const startPosition = this.resolveTextPosition(textNodes, start);
         const endPosition = this.resolveTextPosition(textNodes, end);
         const clone = node.cloneNode(false) as Element;
+        clone.classList.add('red-text-fragment');
+        if (index > 0) {
+          clone.classList.add('red-text-continuation');
+        }
 
         range.setStart(startPosition.node, startPosition.offset);
         range.setEnd(endPosition.node, endPosition.offset);

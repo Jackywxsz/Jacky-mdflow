@@ -5324,15 +5324,17 @@ var RedNoteExporter = class {
     const chunks = [];
     for (let index = 0; index < text.length; index += maxChars) {
       const clone = node.cloneNode(false);
+      clone.classList.add("red-text-fragment");
+      if (index > 0) {
+        clone.classList.add("red-text-continuation");
+      }
       clone.textContent = text.slice(index, index + maxChars);
       chunks.push(clone);
     }
     return chunks.length > 0 ? chunks : [node];
   }
   normalizePaginationEntries(entries, settings) {
-    const maxChars = this.getMaxTextBlockChars(settings);
     return entries.flatMap((entry) => {
-      var _a;
       if (!entry.node || entry.forceBreakBefore || entry.sectionTitle) {
         return [entry];
       }
@@ -5347,14 +5349,7 @@ var RedNoteExporter = class {
       if (tag === "pre") {
         return this.splitPreBlock(node, settings).map((splitNode) => ({ node: splitNode }));
       }
-      if (!["p", "blockquote"].includes(tag)) {
-        return [entry];
-      }
-      const textLength = ((_a = node.textContent) == null ? void 0 : _a.trim().length) || 0;
-      if (textLength <= maxChars) {
-        return [entry];
-      }
-      return this.splitTextBlock(node, maxChars).map((splitNode) => ({ node: splitNode }));
+      return [entry];
     });
   }
   splitTableBlock(node) {
@@ -5448,11 +5443,15 @@ var RedNoteExporter = class {
     if (textNodes.length === 0 || fullText.trim().length <= maxChars) {
       return [node];
     }
-    return this.getTextChunkRanges(fullText, maxChars).map(({ start, end }) => {
+    return this.getTextChunkRanges(fullText, maxChars).map(({ start, end }, index) => {
       const range = node.ownerDocument.createRange();
       const startPosition = this.resolveTextPosition(textNodes, start);
       const endPosition = this.resolveTextPosition(textNodes, end);
       const clone = node.cloneNode(false);
+      clone.classList.add("red-text-fragment");
+      if (index > 0) {
+        clone.classList.add("red-text-continuation");
+      }
       range.setStart(startPosition.node, startPosition.offset);
       range.setEnd(endPosition.node, endPosition.offset);
       clone.appendChild(range.cloneContents());

@@ -567,6 +567,14 @@
   margin-top: -4px;
 }
 
+.mdflow-rednote-section-body .red-text-fragment {
+  margin-bottom: 0;
+}
+
+.mdflow-rednote-section-body .red-text-fragment + .red-text-fragment {
+  margin-top: 0;
+}
+
 .mdflow-rednote-section-body li {
   margin: 6px 0;
 }
@@ -640,6 +648,14 @@
 
 .mdflow-rednote-flow-body li {
   margin: 5px 0;
+}
+
+.mdflow-rednote-flow-body .red-text-fragment {
+  margin-bottom: 0;
+}
+
+.mdflow-rednote-flow-body .red-text-fragment + .red-text-fragment {
+  margin-top: 0;
 }
 
 .jacky-cover-section {
