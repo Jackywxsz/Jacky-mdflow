@@ -389,7 +389,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       .filter((child, index) => {
         const tag = child.tagName.toLowerCase();
         const text = child.textContent?.trim() || '';
-        return !(index === 0 && ['h1', 'h2', 'h3'].includes(tag) && text === fallbackTitle);
+        return !(index === 0 && tag === 'h1' && text === fallbackTitle);
       })
       .map((child) => child.cloneNode(true) as Element);
   }

@@ -5055,7 +5055,7 @@ var RedNoteExporter = class {
       var _a;
       const tag = child.tagName.toLowerCase();
       const text = ((_a = child.textContent) == null ? void 0 : _a.trim()) || "";
-      return !(index === 0 && ["h1", "h2", "h3"].includes(tag) && text === fallbackTitle);
+      return !(index === 0 && tag === "h1" && text === fallbackTitle);
     }).map((child) => child.cloneNode(true));
   }
   buildSummary(sections) {

@@ -617,9 +617,20 @@
 .mdflow-rednote-flow-body h3 {
   margin: 14px 0 8px;
   color: var(--rn-heading-color);
-  font-size: calc(var(--rn-base-font-size) + 2px);
   line-height: 1.32;
   font-weight: 850;
+}
+
+.mdflow-rednote-flow-body h1 {
+  font-size: calc(var(--rn-base-font-size) + 8px);
+}
+
+.mdflow-rednote-flow-body h2 {
+  font-size: calc(var(--rn-base-font-size) + 6px);
+}
+
+.mdflow-rednote-flow-body h3 {
+  font-size: calc(var(--rn-base-font-size) + 3px);
 }
 
 .mdflow-rednote-flow-body ul,
