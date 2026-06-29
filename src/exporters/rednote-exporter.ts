@@ -664,6 +664,12 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const tag = node.tagName.toLowerCase();
 
+    if (tag === 'img') {
+      const fittedImage = node.cloneNode(true) as Element;
+      fittedImage.classList.add('red-image-fit-page');
+      return [fittedImage];
+    }
+
     if (['p', 'blockquote'].includes(tag)) {
       return this.splitTextBlockToFit(node, title, measurer, settings);
     }

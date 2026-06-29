@@ -5263,6 +5263,11 @@ var RedNoteExporter = class {
       return [node];
     }
     const tag = node.tagName.toLowerCase();
+    if (tag === "img") {
+      const fittedImage = node.cloneNode(true);
+      fittedImage.classList.add("red-image-fit-page");
+      return [fittedImage];
+    }
     if (["p", "blockquote"].includes(tag)) {
       return this.splitTextBlockToFit(node, title, measurer, settings);
     }

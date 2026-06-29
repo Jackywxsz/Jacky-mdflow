@@ -875,12 +875,17 @@
 .red-image {
   width: 100%;
   height: auto;
+  max-height: 300px;
   display: block;
   margin: 14px auto;
   border-radius: 14px;
-  object-fit: cover;
+  object-fit: contain;
   box-shadow: 0 10px 24px rgba(43, 28, 17, 0.12);
   background: rgba(255, 255, 255, 0.55);
+}
+
+.red-image-fit-page {
+  height: 300px;
 }
 
 .red-blockquote {
