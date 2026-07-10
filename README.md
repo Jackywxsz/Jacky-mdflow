@@ -40,6 +40,10 @@
 
 ## 安装
 
+### Obsidian 第三方插件市场
+
+审核通过后，可在 Obsidian 中打开 `设置 -> 第三方插件 -> 浏览`，搜索 `Jacky-mdflow` 并安装。
+
 ### 手动安装
 
 1. 前往 [Releases](https://github.com/Jackywxsz/Jacky-mdflow/releases) 下载最新版发布包。
@@ -149,6 +153,12 @@ X 不能像公众号一样稳定接收剪贴板里的本地图片，所以插件
 
 ## 更新日志
 
+### 2026-07-10 / v1.2.0
+
+- 准备 Obsidian 第三方插件市场发布所需的版本元数据与自动化 Release。
+- 新增官方 Obsidian ESLint 规则检查，并修复插件生命周期、命令名称、设置页标题和预览 DOM 安全问题。
+- 最低支持版本调整为 Obsidian 1.7.2，与实际使用的 API 保持一致。
+
 ### 2026-06-29
 
 - 小红书新增「排版」选择。
@@ -180,6 +190,13 @@ X 不能像公众号一样稳定接收剪贴板里的本地图片，所以插件
 - 极少数外链图片图床可能不稳定，建议优先使用 Obsidian 本地图片或稳定 CDN
 - 小红书目前更适合图文卡片导出，不是所见即所得设计器
 
+## 隐私、联网与推广说明
+
+- 插件不要求登录或付费，不收集遥测数据，也不会把笔记内容上传到作者服务器。
+- 只有当当前笔记包含 `http://` 或 `https://` 外链图片时，插件才会请求对应图片地址，用于预览、复制或导出；不会请求与当前内容无关的远程服务。
+- 插件默认只读取当前 Obsidian Vault 中的笔记和图片。只有在用户主动选择头像或封面时，才会读取所选图片，并把图片数据保存在该 Vault 的插件配置中。
+- 插件内「关于作者」页面包含随插件打包的作者社交账号二维码；README 的「更多资源」包含作者课程链接。这些都是静态推广内容，不会从远程广告服务动态加载。
+
 ## 更多资源
 
 如果你想系统学习 AI 内容创作、工作流搭建和工具化思路，可以看我的知识库与答疑群介绍：
@@ -210,6 +227,11 @@ npm run deploy
 - Obsidian `MarkdownRenderer`
 - `html-to-image`
 - `jszip`
+
+## 第三方许可
+
+- [`html-to-image`](https://github.com/bubkoo/html-to-image/blob/master/LICENSE) — MIT License，Copyright (c) 2017-2025 W.Y.
+- [`JSZip`](https://github.com/Stuk/jszip/blob/main/LICENSE.markdown) — 本项目按 MIT License 使用，Copyright (c) 2009-2016 Stuart Knightley、David Duponchel、Franz Buchinger、António Afonso。
 
 ## License
 

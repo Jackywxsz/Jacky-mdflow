@@ -26,7 +26,7 @@ export class RedNoteSettingsManager extends Events {
   }
 
   async load(): Promise<void> {
-    const rawData = await this.plugin.loadData();
+    const rawData: unknown = await this.plugin.loadData();
     const pluginData = this.normalizePluginData(rawData);
     this.settings = this.normalizeSettings(pluginData.rednote);
   }
@@ -64,11 +64,11 @@ export class RedNoteSettingsManager extends Events {
   }
 
   async resetAsset(field: RedNoteAssetField): Promise<void> {
-    await this.update({ [field]: '' } as Pick<RedNoteSettings, typeof field>);
+    await this.update({ [field]: '' });
   }
 
   private async save(): Promise<void> {
-    const rawData = await this.plugin.loadData();
+    const rawData: unknown = await this.plugin.loadData();
     const pluginData = this.normalizePluginData(rawData);
     pluginData.rednote = this.settings;
     await this.plugin.saveData(pluginData);

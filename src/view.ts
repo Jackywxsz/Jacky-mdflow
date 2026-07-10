@@ -1,4 +1,4 @@
-import { ItemView, MarkdownView, Notice, TFile, WorkspaceLeaf } from 'obsidian';
+import { ItemView, MarkdownView, Notice, setIcon, TFile, WorkspaceLeaf } from 'obsidian';
 import { MarkdownConverter } from './converter';
 import { ThemeManager } from './themes/theme-manager';
 import { ImageResolver } from './images/image-resolver';
@@ -112,29 +112,29 @@ export class MDFlowView extends ItemView {
       }
     });
 
-    themeSelect.addEventListener('change', async () => {
+    themeSelect.addEventListener('change', () => {
       this.themeManager.setCurrentTheme(themeSelect.value);
-      await this.refreshPreview();
+      void this.refreshPreview();
     });
 
     this.redNoteControlsEl = toolbar.createDiv({ cls: 'mdflow-rednote-controls' });
     this.renderRedNoteControls(this.redNoteControlsEl);
 
     const previewContainer = container.createDiv({ cls: 'mdflow-preview-container' });
-    this.previewEl = previewContainer.createDiv({ cls: 'mdflow-preview' }) as HTMLElement;
+    this.previewEl = previewContainer.createDiv({ cls: 'mdflow-preview' });
     this.previewEl.setAttribute('data-platform', this.currentPlatform);
 
-    this.exportBtnContainerEl = container.createDiv({ cls: 'mdflow-export-btn' }) as HTMLElement;
+    this.exportBtnContainerEl = container.createDiv({ cls: 'mdflow-export-btn' });
     this.exportBtnEl = this.exportBtnContainerEl.createEl('button', {
       text: '复制到剪贴板',
       cls: 'mod-cta',
     });
-    this.exportBtnEl.addEventListener('click', () => this.handleExport());
+    this.exportBtnEl.addEventListener('click', () => void this.handleExport());
 
-    this.redNoteBottomBarEl = container.createDiv({ cls: 'mdflow-rednote-bottom-bar' }) as HTMLElement;
+    this.redNoteBottomBarEl = container.createDiv({ cls: 'mdflow-rednote-bottom-bar' });
     this.renderRedNoteBottomBar(this.redNoteBottomBarEl);
 
-    this.globalBottomBarEl = container.createDiv({ cls: 'mdflow-global-bottom-bar' }) as HTMLElement;
+    this.globalBottomBarEl = container.createDiv({ cls: 'mdflow-global-bottom-bar' });
     this.renderGlobalBottomBar(this.globalBottomBarEl);
 
     this.updateToolbarForPlatform();
@@ -225,14 +225,14 @@ export class MDFlowView extends ItemView {
       type: 'button',
     });
     guideBtn.setAttribute('aria-label', '使用指南');
-    guideBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+    setIcon(guideBtn, 'circle-help');
     guideBtn.addEventListener('click', (e) => this.toggleUsageGuide(e));
 
     const aboutBtn = leftGroup.createEl('button', {
       cls: 'mdflow-rn-bar-about-btn',
       type: 'button',
+      text: '关于作者',
     });
-    aboutBtn.innerHTML = '❤️ 关于作者';
     aboutBtn.addEventListener('click', () => {
       new RedNoteAboutModal(this.app).open();
     });
@@ -245,38 +245,46 @@ export class MDFlowView extends ItemView {
       return;
     }
 
-    const popover = document.createElement('div');
-    popover.className = 'mdflow-rn-guide-popover';
-    popover.innerHTML = `
-      <div class="mdflow-rn-guide-title">使用指南</div>
-      <div class="mdflow-rn-guide-content">
-        <div class="mdflow-rn-guide-item">1. <b>核心用法</b>：用二级标题(##)标记分节，内容会自动排满页面</div>
-        <div class="mdflow-rn-guide-item">2. <b>排版模式</b>：切到正文卡片流后，二级标题会作为正文小标题，不再强制分页</div>
-        <div class="mdflow-rn-guide-item">3. <b>内容分页</b>：需要固定换页时使用 ---，否则会根据文字、图片和代码块自动分页</div>
-        <div class="mdflow-rn-guide-item">4. <b>首图制作</b>：单独调整首节字号至 20-24px，使用【下载当前页】导出</div>
-        <div class="mdflow-rn-guide-item">5. <b>长文优化</b>：内容较多的章节可调小字号至 14-16px 后单独导出</div>
-        <div class="mdflow-rn-guide-item">6. <b>批量操作</b>：保持统一字号时，用【导出全部页】批量生成</div>
-        <div class="mdflow-rn-guide-item">7. <b>模板切换</b>：顶部选择器可切换不同视觉风格</div>
-      </div>
-    `;
+    const popover = createDiv({ cls: 'mdflow-rn-guide-popover' });
+    popover.createDiv({ cls: 'mdflow-rn-guide-title', text: '使用指南' });
+    const guideContent = popover.createDiv({ cls: 'mdflow-rn-guide-content' });
+    const guideItems: Array<[string, string]> = [
+      ['核心用法', '用二级标题(##)标记分节，内容会自动排满页面'],
+      ['排版模式', '切到正文卡片流后，二级标题会作为正文小标题，不再强制分页'],
+      ['内容分页', '需要固定换页时使用 ---，否则会根据文字、图片和代码块自动分页'],
+      ['首图制作', '单独调整首节字号至 20-24px，使用【下载当前页】导出'],
+      ['长文优化', '内容较多的章节可调小字号至 14-16px 后单独导出'],
+      ['批量操作', '保持统一字号时，用【导出全部页】批量生成'],
+      ['模板切换', '顶部选择器可切换不同视觉风格'],
+    ];
+
+    guideItems.forEach(([title, description], index) => {
+      const item = guideContent.createDiv({ cls: 'mdflow-rn-guide-item' });
+      item.appendText(`${index + 1}. `);
+      item.createEl('b', { text: title });
+      item.appendText(`：${description}`);
+    });
 
     const bar = this.globalBottomBarEl;
     const barRect = bar.getBoundingClientRect();
-    popover.style.position = 'fixed';
-    popover.style.bottom = `${window.innerHeight - barRect.top + 8}px`;
-    popover.style.left = `${barRect.left + 12}px`;
-    popover.style.width = `${barRect.width - 24}px`;
-    document.body.appendChild(popover);
+    popover.setCssProps({
+      position: 'fixed',
+      bottom: `${window.innerHeight - barRect.top + 8}px`,
+      left: `${barRect.left + 12}px`,
+      width: `${barRect.width - 24}px`,
+    });
+    const doc = this.containerEl.ownerDocument;
+    doc.body.appendChild(popover);
     this.redNoteGuidePopoverEl = popover;
 
     const closeOnOutsideClick = (event: MouseEvent) => {
       if (!popover.contains(event.target as Node) && event.target !== (e.target as Node)) {
         popover.remove();
         this.redNoteGuidePopoverEl = null;
-        document.removeEventListener('click', closeOnOutsideClick);
+        doc.removeEventListener('click', closeOnOutsideClick);
       }
     };
-    setTimeout(() => document.addEventListener('click', closeOnOutsideClick), 0);
+    window.setTimeout(() => doc.addEventListener('click', closeOnOutsideClick), 0);
   }
 
   private createControlSelect(
@@ -312,10 +320,10 @@ export class MDFlowView extends ItemView {
     input.max = '28';
     input.step = '1';
 
-    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+    let debounceTimer: number | null = null;
     const debouncedOnChange = () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
+      if (debounceTimer) window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
         const parsed = Number.parseInt(input.value, 10);
         if (!Number.isNaN(parsed) && parsed >= 12 && parsed <= 28) {
           void onChange(input.value);
@@ -324,7 +332,7 @@ export class MDFlowView extends ItemView {
     };
 
     input.addEventListener('change', () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
+      if (debounceTimer) window.clearTimeout(debounceTimer);
       const parsed = Number.parseInt(input.value, 10);
       if (!Number.isNaN(parsed)) {
         void onChange(input.value);
@@ -354,50 +362,37 @@ export class MDFlowView extends ItemView {
 
     tab.setText(label);
 
-    tab.addEventListener('click', async () => {
+    tab.addEventListener('click', () => {
       this.currentPlatform = platform;
       container.querySelectorAll('.mdflow-tab').forEach((currentTab) => currentTab.removeClass('active'));
       tab.addClass('active');
       this.updateToolbarForPlatform();
-      await this.refreshPreview();
+      void this.refreshPreview();
     });
   }
 
   private updateToolbarForPlatform(): void {
     this.previewEl?.setAttribute('data-platform', this.currentPlatform);
+    const isWeChat = this.currentPlatform === 'wechat';
+    const isX = this.currentPlatform === 'x';
+    const isRedNote = this.currentPlatform === 'rednote';
 
-    if (this.currentPlatform === 'wechat') {
-      this.themeSelector.style.display = '';
-      this.redNoteControlsEl.style.display = 'none';
-      this.exportBtnContainerEl.style.display = '';
-      this.redNoteBottomBarEl.style.display = 'none';
-      this.exportBtnEl.textContent = '复制到剪贴板';
-      return;
-    }
+    this.themeSelector.toggleClass('mdflow-is-hidden', !isWeChat);
+    this.redNoteControlsEl.toggleClass('mdflow-is-hidden', !isRedNote);
+    this.exportBtnContainerEl.toggleClass('mdflow-is-hidden', isRedNote);
+    this.redNoteBottomBarEl.toggleClass('mdflow-is-hidden', !isRedNote);
+    this.exportBtnEl.textContent = isX ? '复制 X Articles 格式' : '复制到剪贴板';
 
-    if (this.currentPlatform === 'x') {
-      this.themeSelector.style.display = 'none';
-      this.redNoteControlsEl.style.display = 'none';
-      this.exportBtnContainerEl.style.display = '';
-      this.redNoteBottomBarEl.style.display = 'none';
-      this.exportBtnEl.textContent = '复制 X Articles 格式';
-      return;
-    }
-
-    this.themeSelector.style.display = 'none';
-    this.redNoteControlsEl.style.display = '';
-    this.exportBtnContainerEl.style.display = 'none';
-    this.redNoteBottomBarEl.style.display = '';
-    this.syncRedNoteControls();
+    if (isRedNote) this.syncRedNoteControls();
   }
 
   private registerEvents(): void {
     this.registerEvent(
-      this.app.workspace.on('file-open', async (file) => {
+      this.app.workspace.on('file-open', (file) => {
         this.cancelEditorPreviewDebounce();
 
         if (file && file.extension === 'md') {
-          await this.updatePreviewForOpenedFile(file);
+          void this.updatePreviewForOpenedFile(file);
           return;
         }
 
@@ -448,11 +443,11 @@ export class MDFlowView extends ItemView {
     );
 
     this.registerEvent(
-      this.redNoteSettings.on('change', async () => {
+      this.redNoteSettings.on('change', () => {
         this.syncRedNoteControls();
 
         if (this.currentPlatform === 'rednote' && this.activeFile) {
-          await this.refreshPreview();
+          void this.refreshPreview();
         }
       })
     );
@@ -465,7 +460,7 @@ export class MDFlowView extends ItemView {
     this.redNoteLayoutModeSelectEl.value = settings.layoutMode;
     this.redNoteTemplateSelectEl.value = settings.templateId;
     this.redNoteFontSizeInputEl.value = String(settings.fontSize);
-    this.redNoteCoverUploadBtnEl.style.display = template.showCover ? '' : 'none';
+    this.redNoteCoverUploadBtnEl.toggleClass('mdflow-is-hidden', !template.showCover);
 
     const fontValue = settings.fontFamily;
     const hasFontOption = Array.from(this.redNoteFontSelectEl.options).some(
@@ -473,7 +468,7 @@ export class MDFlowView extends ItemView {
     );
 
     if (!hasFontOption) {
-      const option = document.createElement('option');
+      const option = createEl('option');
       option.value = fontValue;
       option.text = '当前自定义字体';
       this.redNoteFontSelectEl.appendChild(option);
@@ -483,7 +478,7 @@ export class MDFlowView extends ItemView {
   }
 
   private async handleRedNoteImageUpload(field: RedNoteAssetField): Promise<void> {
-    const input = document.createElement('input');
+    const input = createEl('input');
     input.type = 'file';
     input.accept = 'image/*';
 
@@ -492,24 +487,27 @@ export class MDFlowView extends ItemView {
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = async () => {
+      reader.onload = () => {
         const result = typeof reader.result === 'string' ? reader.result : '';
         if (!result) return;
 
         if (field === 'userAvatar') {
-          await this.redNoteSettings.update({ userAvatar: result });
-          new Notice('头像已更新');
+          void this.redNoteSettings.update({ userAvatar: result }).then(() => {
+            new Notice('头像已更新');
+          });
           return;
         }
 
         if (field === 'coverImage') {
-          await this.redNoteSettings.update({ coverImage: result });
-          new Notice('封面已更新');
+          void this.redNoteSettings.update({ coverImage: result }).then(() => {
+            new Notice('封面已更新');
+          });
           return;
         }
 
-        await this.redNoteSettings.update({ [field]: result });
-        new Notice('图片已更新');
+        void this.redNoteSettings.update({ [field]: result }).then(() => {
+          new Notice('图片已更新');
+        });
       };
       reader.readAsDataURL(file);
     });
@@ -570,18 +568,42 @@ export class MDFlowView extends ItemView {
     if (runId !== this.previewRunId) return;
 
     this.preparedContent = preparedContent;
-    this.previewEl.innerHTML = preparedContent.previewHtml;
+    this.replacePreviewHtml(preparedContent.previewHtml);
     await exporter.mountPreview?.(this.previewEl, preparedContent, context);
   }
 
   private showPlaceholder(): void {
     this.preparedContent = null;
-    this.previewEl.innerHTML = '<div class="mdflow-placeholder">打开一个 Markdown 文件开始预览</div>';
+    this.showPreviewMessage('打开一个 Markdown 文件开始预览');
   }
 
   private showLoading(message: string): void {
     this.preparedContent = null;
-    this.previewEl.innerHTML = `<div class="mdflow-placeholder">${message}</div>`;
+    this.showPreviewMessage(message);
+  }
+
+  private showPreviewMessage(message: string): void {
+    this.previewEl.empty();
+    this.previewEl.createDiv({ cls: 'mdflow-placeholder', text: message });
+  }
+
+  private replacePreviewHtml(html: string): void {
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    parsed.querySelectorAll('script, iframe, object, embed').forEach((element) => element.remove());
+    parsed.querySelectorAll('*').forEach((element) => {
+      Array.from(element.attributes).forEach((attribute) => {
+        const name = attribute.name.toLowerCase();
+        const value = attribute.value.trim().toLowerCase();
+        if (name.startsWith('on') || ((name === 'href' || name === 'src') && value.startsWith('javascript:'))) {
+          element.removeAttribute(attribute.name);
+        }
+      });
+    });
+
+    this.previewEl.empty();
+    Array.from(parsed.body.childNodes).forEach((node) => {
+      this.previewEl.appendChild(this.previewEl.ownerDocument.importNode(node, true));
+    });
   }
 
   private async handleDownloadCurrentPage(): Promise<void> {
@@ -590,7 +612,7 @@ export class MDFlowView extends ItemView {
       return;
     }
 
-    const imagePreview = this.previewEl.querySelector('.red-image-preview') as HTMLElement | null;
+    const imagePreview = this.previewEl.querySelector<HTMLElement>('.red-image-preview');
     if (!imagePreview) {
       new Notice('没有预览内容');
       return;

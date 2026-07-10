@@ -1,5 +1,5 @@
 import { Modal } from 'obsidian';
-import { WECHAT_PAY_QR, VIDEO_ACCOUNT_QR, WECHAT_PUBLIC_QR, DOUYIN_QR, XIAOHONGSHU_QR } from './author-assets';
+import { VIDEO_ACCOUNT_QR, WECHAT_PUBLIC_QR, DOUYIN_QR, XIAOHONGSHU_QR } from './author-assets';
 
 export class RedNoteAboutModal extends Modal {
   constructor(app: Modal['app']) {
@@ -24,15 +24,6 @@ export class RedNoteAboutModal extends Modal {
     ];
     pluginIntro.forEach((line) => body.createEl('p', { text: line }));
 
-    // Support section
-    const supportSection = body.createDiv({ cls: 'mdflow-about-section' });
-    supportSection.createEl('h3', { cls: 'mdflow-about-section-title', text: '请我喝杯咖啡' });
-    supportSection.createEl('p', {
-      cls: 'mdflow-about-section-text',
-      text: '如果 Jacky-mdflow 帮你省下了排版的时间，愿意的话请我喝杯咖啡吧。你的每一份支持，都是我持续打磨这款工具最大的动力。',
-    });
-    this.renderQrCard(supportSection, WECHAT_PAY_QR, '微信扫一扫打赏');
-
     // Social accounts
     const socialSection = body.createDiv({ cls: 'mdflow-about-section' });
     socialSection.createEl('h3', { cls: 'mdflow-about-section-title', text: '关注我的更新' });
@@ -49,19 +40,9 @@ export class RedNoteAboutModal extends Modal {
 
     // Footer
     const footer = card.createDiv({ cls: 'mdflow-about-footer' });
-    footer.createEl('div', { text: '无限生长，持续创作' });
-    footer.createEl('div', { cls: 'mdflow-about-footer-separator', text: '•' });
-    footer.createEl('div', { text: '@Jacky 无限生长' });
-  }
-
-  private renderQrCard(container: HTMLElement, imageSrc: string, caption: string): void {
-    const mediaGrid = container.createDiv({ cls: 'mdflow-about-media-grid' });
-    const card = mediaGrid.createDiv({ cls: 'mdflow-about-media-card' });
-    card.createEl('img', {
-      cls: 'mdflow-about-media-image',
-      attr: { src: imageSrc, alt: caption },
-    });
-    card.createEl('div', { cls: 'mdflow-about-media-caption', text: caption });
+    footer.createDiv({ text: '无限生长，持续创作' });
+    footer.createDiv({ cls: 'mdflow-about-footer-separator', text: '•' });
+    footer.createDiv({ text: '@Jacky 无限生长' });
   }
 
   private renderSocialCard(container: HTMLElement, imageSrc: string, label: string): void {
@@ -70,6 +51,6 @@ export class RedNoteAboutModal extends Modal {
       cls: 'mdflow-about-social-image',
       attr: { src: imageSrc, alt: label },
     });
-    card.createEl('div', { cls: 'mdflow-about-social-label', text: label });
+    card.createDiv({ cls: 'mdflow-about-social-label', text: label });
   }
 }

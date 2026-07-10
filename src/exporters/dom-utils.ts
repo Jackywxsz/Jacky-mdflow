@@ -47,7 +47,7 @@ export function stripObsidianArtifacts(root: ParentNode): void {
 
 export function transformTaskLists(root: ParentNode): void {
   root.querySelectorAll('li.task-list-item').forEach((item) => {
-    const checkbox = item.querySelector('input[type="checkbox"]') as HTMLInputElement | null;
+    const checkbox = item.querySelector<HTMLInputElement>('input[type="checkbox"]');
     if (!checkbox) return;
 
     const marker = item.ownerDocument.createTextNode(checkbox.checked ? '☑ ' : '☐ ');

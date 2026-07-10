@@ -109,9 +109,9 @@ export class ImageResolver {
   private pruneImageCache(): void {
     const maxCachedImages = 120;
     while (this.imageDataUrlCache.size > maxCachedImages) {
-      const firstKey = this.imageDataUrlCache.keys().next().value;
-      if (!firstKey) return;
-      this.imageDataUrlCache.delete(firstKey);
+      const firstEntry = this.imageDataUrlCache.keys().next();
+      if (firstEntry.done) return;
+      this.imageDataUrlCache.delete(firstEntry.value);
     }
   }
 
@@ -152,11 +152,13 @@ export class ImageResolver {
       }
     }
 
-    throw lastError || new Error('External image request failed');
+    throw lastError instanceof Error
+      ? lastError
+      : new Error('External image request failed');
   }
 
   private async fetchInternalImageBlob(url: string): Promise<Blob> {
-    const response = await fetch(url);
+    const response = await window.fetch(url);
     return response.blob();
   }
 
@@ -201,7 +203,7 @@ export class ImageResolver {
           }
         }
 
-        const canvas = document.createElement('canvas');
+        const canvas = createEl('canvas');
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
@@ -258,7 +260,7 @@ export class ImageResolver {
       }
 
       return url.toString();
-    } catch (error) {
+    } catch {
       return src.split('#')[0];
     }
   }

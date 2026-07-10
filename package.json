@@ -1,21 +1,28 @@
 {
   "name": "mdflow-publisher",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Jacky-mdflow Obsidian 全平台内容分发插件",
   "license": "AGPL-3.0-only",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-    "deploy": "npm run build && cp main.js styles.css manifest.json \"${OBSIDIAN_VAULT_PATH}/.obsidian/plugins/mdflow-publisher/\""
+    "deploy": "npm run build && cp main.js styles.css manifest.json \"${OBSIDIAN_VAULT_PATH}/.obsidian/plugins/mdflow-publisher/\"",
+    "lint": "eslint .",
+    "version": "node version-bump.mjs && git add manifest.json versions.json"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@types/node": "^20.0.0",
-    "builtin-modules": "^3.3.0",
-    "esbuild": "^0.20.2",
+    "esbuild": "^0.25.5",
+    "eslint": "^9.39.4",
+    "eslint-plugin-obsidianmd": "^0.4.1",
+    "globals": "^17.7.0",
+    "jiti": "^2.7.0",
     "obsidian": "latest",
     "tslib": "^2.6.0",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.63.0"
   },
   "dependencies": {
     "html-to-image": "^1.11.13",

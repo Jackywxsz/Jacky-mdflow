@@ -7,7 +7,6 @@ export default class MDFlowPlugin extends Plugin {
   redNoteSettings!: RedNoteSettingsManager;
 
   async onload() {
-    console.log('Loading Jacky-mdflow plugin');
     this.redNoteSettings = new RedNoteSettingsManager(this);
     await this.redNoteSettings.load();
 
@@ -21,26 +20,21 @@ export default class MDFlowPlugin extends Plugin {
     );
 
     this.addRibbonIcon('share-2', 'Jacky-mdflow', () => {
-      this.activateView();
+      void this.activateView();
     });
 
     this.addCommand({
       id: 'open-mdflow-view',
-      name: '打开 Jacky-mdflow',
+      name: '打开内容分发面板',
       callback: () => {
-        this.activateView();
+        void this.activateView();
       }
     });
 
     this.addSettingTab(new MDFlowSettingTab(this.app, this, this.redNoteSettings));
   }
 
-  async onunload() {
-    console.log('Unloading Jacky-mdflow plugin');
-    this.app.workspace.detachLeavesOfType(VIEW_TYPE_MDFLOW);
-  }
-
-  async activateView() {
+  async activateView(): Promise<void> {
     const { workspace } = this.app;
 
     let leaf = workspace.getLeavesOfType(VIEW_TYPE_MDFLOW)[0];
@@ -58,7 +52,7 @@ export default class MDFlowPlugin extends Plugin {
     }
 
     if (leaf) {
-      workspace.revealLeaf(leaf);
+      await workspace.revealLeaf(leaf);
     }
   }
 

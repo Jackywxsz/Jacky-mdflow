@@ -13,7 +13,7 @@ export class MarkdownConverter {
   async convertToHtml(markdown: string, sourceFile: TFile): Promise<string> {
     this.dispose();
 
-    const container = document.createElement('div');
+    const container = createDiv();
     const component = new Component();
     this.renderComponent = component;
 

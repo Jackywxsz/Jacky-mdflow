@@ -19,21 +19,22 @@ export class MDFlowSettingTab extends PluginSettingTab {
     const fontOptions = this.redNoteSettings.getFontOptions();
 
     containerEl.empty();
-    containerEl.createEl('h2', { text: 'Jacky-mdflow' });
     containerEl.createEl('p', {
       text: '这里管理小红书模板、账号信息和导流素材。顶部工具栏负责快速切换，设置页负责长期保存。',
     });
 
-    containerEl.createEl('h3', { text: '模板与排版' });
+    new Setting(containerEl).setName('模板与排版').setHeading();
 
     new Setting(containerEl)
       .setName('默认排版')
       .setDesc('二级标题分页适合章节卡片，正文卡片流适合正文连续排版')
       .addDropdown((dropdown) => {
-        REDNOTE_LAYOUT_MODE_OPTIONS.forEach((option) => dropdown.addOption(option.value, option.label));
+        REDNOTE_LAYOUT_MODE_OPTIONS.forEach((option) => {
+          dropdown.addOption(option.value, option.label);
+        });
         dropdown.setValue(settings.layoutMode);
-        dropdown.onChange(async (value) => {
-          await this.redNoteSettings.update({
+        dropdown.onChange((value) => {
+          void this.redNoteSettings.update({
             layoutMode: value === 'obsidian-flow' ? value : 'heading-sections',
           });
         });
@@ -43,10 +44,12 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setName('默认模板')
       .setDesc('切换小红书图文的整体视觉风格')
       .addDropdown((dropdown) => {
-        getRedNoteTemplateOptions().forEach((option) => dropdown.addOption(option.value, option.label));
+        getRedNoteTemplateOptions().forEach((option) => {
+          dropdown.addOption(option.value, option.label);
+        });
         dropdown.setValue(settings.templateId);
-        dropdown.onChange(async (value) => {
-          await this.redNoteSettings.update({ templateId: value });
+        dropdown.onChange((value) => {
+          void this.redNoteSettings.update({ templateId: value });
         });
       });
 
@@ -54,10 +57,12 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setName('默认字体')
       .setDesc('影响小红书图文的正文与标题字体')
       .addDropdown((dropdown) => {
-        fontOptions.forEach((option) => dropdown.addOption(option.value, option.label));
+        fontOptions.forEach((option) => {
+          dropdown.addOption(option.value, option.label);
+        });
         dropdown.setValue(settings.fontFamily);
-        dropdown.onChange(async (value) => {
-          await this.redNoteSettings.update({ fontFamily: value });
+        dropdown.onChange((value) => {
+          void this.redNoteSettings.update({ fontFamily: value });
         });
       });
 
@@ -66,21 +71,21 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setDesc('建议在 14-18 之间')
       .addText((text) => {
         text.setValue(String(settings.fontSize));
-        text.onChange(async (value) => {
+        text.onChange((value) => {
           const parsed = Number.parseInt(value, 10);
-          await this.redNoteSettings.update({ fontSize: clampRedNoteFontSize(parsed) });
+          void this.redNoteSettings.update({ fontSize: clampRedNoteFontSize(parsed) });
         });
       });
 
-    containerEl.createEl('h3', { text: '账号信息' });
+    new Setting(containerEl).setName('账号信息').setHeading();
 
     new Setting(containerEl)
       .setName('用户名')
       .addText((text) => {
         text.setPlaceholder('例如：Jacky无限生长');
         text.setValue(settings.userName);
-        text.onChange(async (value) => {
-          await this.redNoteSettings.update({ userName: value.trim() || settings.userName });
+        text.onChange((value) => {
+          void this.redNoteSettings.update({ userName: value.trim() || settings.userName });
         });
       });
 
@@ -89,8 +94,8 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .addText((text) => {
         text.setPlaceholder('例如：@Jack');
         text.setValue(settings.userId);
-        text.onChange(async (value) => {
-          await this.redNoteSettings.update({ userId: value.trim() || settings.userId });
+        text.onChange((value) => {
+          void this.redNoteSettings.update({ userId: value.trim() || settings.userId });
         });
       });
 
@@ -99,8 +104,8 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setDesc('在卡片右上角展示当前日期')
       .addToggle((toggle) => {
         toggle.setValue(settings.showTime);
-        toggle.onChange(async (value) => {
-          await this.redNoteSettings.update({ showTime: value });
+        toggle.onChange((value) => {
+          void this.redNoteSettings.update({ showTime: value });
         });
       });
 
@@ -111,8 +116,8 @@ export class MDFlowSettingTab extends PluginSettingTab {
         dropdown.addOption('zh-CN', '中文');
         dropdown.addOption('en-US', 'English');
         dropdown.setValue(settings.timeFormat);
-        dropdown.onChange(async (value) => {
-          await this.redNoteSettings.update({ timeFormat: value });
+        dropdown.onChange((value) => {
+          void this.redNoteSettings.update({ timeFormat: value });
         });
       });
 
@@ -130,15 +135,15 @@ export class MDFlowSettingTab extends PluginSettingTab {
       'coverImage'
     );
 
-    containerEl.createEl('h3', { text: '品牌文案' });
+    new Setting(containerEl).setName('品牌文案').setHeading();
 
     new Setting(containerEl)
       .setName('顶部标签')
       .setDesc('显示在头部右侧的小标签上')
       .addText((text) => {
         text.setValue(settings.notesTitle);
-        text.onChange(async (value) => {
-          await this.redNoteSettings.update({ notesTitle: value.trim() || settings.notesTitle });
+        text.onChange((value) => {
+          void this.redNoteSettings.update({ notesTitle: value.trim() || settings.notesTitle });
         });
       });
 
@@ -147,8 +152,8 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setDesc('显示在封面占位区和作者介绍中')
       .addText((text) => {
         text.setValue(settings.brandTagline);
-        text.onChange(async (value) => {
-          await this.redNoteSettings.update({ brandTagline: value.trim() || settings.brandTagline });
+        text.onChange((value) => {
+          void this.redNoteSettings.update({ brandTagline: value.trim() || settings.brandTagline });
         });
       });
 
@@ -156,8 +161,8 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setName('页脚左侧文案')
       .addText((text) => {
         text.setValue(settings.footerLeftText);
-        text.onChange(async (value) => {
-          await this.redNoteSettings.update({ footerLeftText: value.trim() || settings.footerLeftText });
+        text.onChange((value) => {
+          void this.redNoteSettings.update({ footerLeftText: value.trim() || settings.footerLeftText });
         });
       });
 
@@ -165,11 +170,10 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setName('页脚右侧文案')
       .addText((text) => {
         text.setValue(settings.footerRightText);
-        text.onChange(async (value) => {
-          await this.redNoteSettings.update({ footerRightText: value.trim() || settings.footerRightText });
+        text.onChange((value) => {
+          void this.redNoteSettings.update({ footerRightText: value.trim() || settings.footerRightText });
         });
       });
-
   }
 
   private addImageSetting(
@@ -185,23 +189,21 @@ export class MDFlowSettingTab extends PluginSettingTab {
       .setDesc(`${desc}${hasImage ? '，当前已上传。' : '，当前未上传。'}`)
       .addButton((button) => {
         button.setButtonText(hasImage ? '替换' : '上传');
-        button.onClick(async () => {
-          await this.pickAndStoreImage(field);
-          this.display();
+        button.onClick(() => {
+          void this.pickAndStoreImage(field).then(() => this.display());
         });
       })
       .addButton((button) => {
         button.setButtonText('清空');
         button.setDisabled(!hasImage);
-        button.onClick(async () => {
-          await this.redNoteSettings.resetAsset(field);
-          this.display();
+        button.onClick(() => {
+          void this.redNoteSettings.resetAsset(field).then(() => this.display());
         });
       });
   }
 
   private async pickAndStoreImage(field: RedNoteAssetField): Promise<void> {
-    const input = document.createElement('input');
+    const input = createEl('input');
     input.type = 'file';
     input.accept = 'image/*';
 
@@ -214,10 +216,11 @@ export class MDFlowSettingTab extends PluginSettingTab {
         }
 
         const reader = new FileReader();
-        reader.onload = async () => {
+        reader.onload = () => {
           const result = typeof reader.result === 'string' ? reader.result : '';
           if (result) {
-            await this.redNoteSettings.update({ [field]: result });
+            void this.redNoteSettings.update({ [field]: result }).then(() => resolve());
+            return;
           }
           resolve();
         };

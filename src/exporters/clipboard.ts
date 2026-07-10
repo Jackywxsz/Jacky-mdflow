@@ -1,10 +1,9 @@
 import { getPlainText } from './dom-utils';
 
 function fallbackCopy(text: string): void {
-  const textarea = document.createElement('textarea');
+  const textarea = createEl('textarea');
   textarea.value = text;
-  textarea.style.position = 'fixed';
-  textarea.style.opacity = '0';
+  textarea.addClass('mdflow-clipboard-fallback');
   document.body.appendChild(textarea);
   textarea.select();
   document.execCommand('copy');

@@ -121,15 +121,15 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     container: HTMLElement,
     content: PreparedPlatformContent<RedNotePreparedData>
   ): void {
-    const wrapper = container.querySelector('.red-preview-wrapper') as HTMLElement | null;
+    const wrapper = container.querySelector<HTMLElement>('.red-preview-wrapper');
     if (!wrapper) return;
 
-    const imagePreview = wrapper.querySelector('.red-image-preview') as HTMLElement | null;
-    const copyButton = wrapper.querySelector('.red-copy-button') as HTMLButtonElement | null;
-    const prevButton = wrapper.querySelector('[data-rednote-nav="prev"]') as HTMLButtonElement | null;
-    const nextButton = wrapper.querySelector('[data-rednote-nav="next"]') as HTMLButtonElement | null;
-    const indicator = wrapper.querySelector('.red-page-indicator') as HTMLElement | null;
-    const sections = Array.from(wrapper.querySelectorAll('.red-content-section')) as HTMLElement[];
+    const imagePreview = wrapper.querySelector<HTMLElement>('.red-image-preview');
+    const copyButton = wrapper.querySelector<HTMLButtonElement>('.red-copy-button');
+    const prevButton = wrapper.querySelector<HTMLButtonElement>('[data-rednote-nav="prev"]');
+    const nextButton = wrapper.querySelector<HTMLButtonElement>('[data-rednote-nav="next"]');
+    const indicator = wrapper.querySelector<HTMLElement>('.red-page-indicator');
+    const sections = Array.from(wrapper.querySelectorAll<HTMLElement>('.red-content-section'));
 
     if (!imagePreview || !prevButton || !nextButton || !indicator || sections.length === 0) {
       return;
@@ -161,20 +161,20 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       updateNavigation();
     });
 
-    copyButton?.addEventListener('click', async () => {
+    copyButton?.addEventListener('click', () => {
       copyButton.disabled = true;
-      try {
-        const blob = await this.capturePreview(imagePreview);
-        await writeImageToClipboard(blob);
-        new Notice('当前页已复制到剪贴板');
-      } catch (error) {
-        console.error('Copy rednote image failed:', error);
-        new Notice('复制当前页失败');
-      } finally {
-        window.setTimeout(() => {
-          copyButton.disabled = false;
-        }, 800);
-      }
+      void this.capturePreview(imagePreview)
+        .then((blob) => writeImageToClipboard(blob))
+        .then(() => new Notice('当前页已复制到剪贴板'))
+        .catch((error: unknown) => {
+          console.error('Copy rednote image failed:', error);
+          new Notice('复制当前页失败');
+        })
+        .finally(() => {
+          window.setTimeout(() => {
+            copyButton.disabled = false;
+          }, 800);
+        });
     });
 
     updateNavigation();
@@ -189,13 +189,13 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       return { success: false, message: '没有可导出的内容' };
     }
 
-    const exportSurface = document.createElement('div');
+    const exportSurface = createDiv();
     exportSurface.className = 'mdflow-rednote-export-surface';
     exportSurface.innerHTML = content.previewHtml;
     document.body.appendChild(exportSurface);
 
     try {
-      const imagePreview = exportSurface.querySelector('.red-image-preview') as HTMLElement | null;
+      const imagePreview = exportSurface.querySelector<HTMLElement>('.red-image-preview');
       if (!imagePreview) {
         throw new Error('未找到小红书预览区域');
       }
@@ -525,7 +525,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
       };
     }
 
-    const root = document.createElement('div');
+    const root = createDiv();
     root.style.position = 'fixed';
     root.style.left = '-10000px';
     root.style.top = '0';
@@ -535,7 +535,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     root.style.pointerEvents = 'none';
     root.style.zIndex = '-1';
 
-    const imagePreview = document.createElement('div');
+    const imagePreview = createDiv();
     imagePreview.className = 'red-image-preview';
     imagePreview.setAttribute('data-template-id', template.id);
     imagePreview.setAttribute('data-rednote-layout', settings.layoutMode);
@@ -545,23 +545,23 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     imagePreview.style.height = '600px';
     imagePreview.style.aspectRatio = 'auto';
 
-    const header = document.createElement('div');
+    const header = createDiv();
     header.className = 'red-preview-header';
     header.innerHTML = this.renderHeader(settings);
 
-    const content = document.createElement('div');
+    const content = createDiv();
     content.className = 'red-preview-content';
 
-    const contentWrapper = document.createElement('div');
+    const contentWrapper = createDiv();
     contentWrapper.className = 'red-content-wrapper';
 
-    const contentContainer = document.createElement('div');
+    const contentContainer = createDiv();
     contentContainer.className = 'red-content-container';
 
-    const section = document.createElement('section');
+    const section = createEl('section');
     section.className = 'red-content-section red-section-active red-section-visible';
 
-    const footer = document.createElement('div');
+    const footer = createDiv();
     footer.className = 'red-preview-footer';
     footer.innerHTML = this.renderFooter(settings);
 
@@ -595,16 +595,16 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   }
 
   private contentFitsMeasuredSection(imagePreview: HTMLElement, section: HTMLElement): boolean {
-    const shell = section.querySelector('.mdflow-rednote-section-shell') as HTMLElement | null;
-    const title = section.querySelector('.mdflow-rednote-section-title') as HTMLElement | null;
-    const body = section.querySelector('.mdflow-rednote-section-body') as HTMLElement | null;
+    const shell = section.querySelector('.mdflow-rednote-section-shell');
+    const title = section.querySelector('.mdflow-rednote-section-title');
+    const body = section.querySelector('.mdflow-rednote-section-body');
     const tolerance = 0;
 
     this.reserveImageSlotsForMeasure(section);
 
     if (!shell || !title || !body) {
-      const flowShell = section.querySelector('.mdflow-rednote-flow-shell') as HTMLElement | null;
-      const flowBody = section.querySelector('.mdflow-rednote-flow-body') as HTMLElement | null;
+      const flowShell = section.querySelector('.mdflow-rednote-flow-shell');
+      const flowBody = section.querySelector('.mdflow-rednote-flow-body');
 
       if (!flowShell || !flowBody) {
         return imagePreview.scrollHeight <= imagePreview.clientHeight + tolerance;
@@ -1329,7 +1329,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
         month: '2-digit',
         day: '2-digit',
       }).format(new Date());
-    } catch (error) {
+    } catch {
       return new Intl.DateTimeFormat('zh-CN', {
         year: 'numeric',
         month: '2-digit',
@@ -1339,7 +1339,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   }
 
   private updatePreviewState(root: ParentNode, activeIndex: number): void {
-    const sections = Array.from(root.querySelectorAll('.red-content-section')) as HTMLElement[];
+    const sections = Array.from(root.querySelectorAll('.red-content-section'));
 
     sections.forEach((section, index) => {
       const isActive = index === activeIndex;
@@ -1424,7 +1424,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
           if (typeof image.decode === 'function') {
             try {
               await image.decode();
-            } catch (error) {
+            } catch {
               // Ignore decode failures and allow fallback handling later.
             }
           }
@@ -1455,7 +1455,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
           return;
         }
 
-        const canvas = document.createElement('canvas');
+        const canvas = createEl('canvas');
         canvas.width = width;
         canvas.height = height;
 
@@ -1477,7 +1477,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
   private downloadBlob(blob: Blob, fileName: string): void {
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = createEl('a');
     link.href = url;
     link.download = fileName;
     document.body.appendChild(link);

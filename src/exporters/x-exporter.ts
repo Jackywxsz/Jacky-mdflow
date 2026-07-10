@@ -208,7 +208,7 @@ export class XArticlesExporter implements PlatformExporter<XPreparedData> {
     }
 
     if (src.startsWith('app://')) {
-      const response = await fetch(src);
+      const response = await window.fetch(src);
       return response.blob();
     }
 
@@ -239,7 +239,7 @@ export class XArticlesExporter implements PlatformExporter<XPreparedData> {
       if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'avif'].includes(extension)) {
         return extension === 'jpeg' ? 'jpg' : extension;
       }
-    } catch (error) {
+    } catch {
       // Fall through to png.
     }
 
@@ -248,7 +248,7 @@ export class XArticlesExporter implements PlatformExporter<XPreparedData> {
 
   private downloadBlob(blob: Blob, fileName: string): void {
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = createEl('a');
     link.href = url;
     link.download = fileName;
     document.body.appendChild(link);
@@ -374,8 +374,6 @@ export class XArticlesExporter implements PlatformExporter<XPreparedData> {
       const tag = element.tagName.toLowerCase();
 
       const href = tag === 'a' ? element.getAttribute('href') : null;
-      const imgSrc = tag === 'img' ? element.getAttribute('src') : null;
-      const imgAlt = tag === 'img' ? element.getAttribute('alt') : null;
       const textContent = element.textContent || '';
 
       Array.from(element.attributes).forEach((attr) => {

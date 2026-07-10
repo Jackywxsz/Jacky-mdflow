@@ -7,6 +7,15 @@
   padding: 0;
 }
 
+.mdflow-view .mdflow-is-hidden {
+  display: none;
+}
+
+.mdflow-clipboard-fallback {
+  position: fixed;
+  opacity: 0;
+}
+
 .mdflow-toolbar {
   padding: 12px;
   border-bottom: 1px solid var(--background-modifier-border);
