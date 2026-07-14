@@ -1,4 +1,4 @@
-import { Notice } from 'obsidian';
+import { Notice, sanitizeHTMLToDom } from 'obsidian';
 import { toBlob } from 'html-to-image';
 import JSZip from 'jszip';
 import { ImageResolver } from '../images/image-resolver';
@@ -191,7 +191,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const exportSurface = createDiv();
     exportSurface.className = 'mdflow-rednote-export-surface';
-    exportSurface.innerHTML = content.previewHtml;
+    exportSurface.appendChild(sanitizeHTMLToDom(content.previewHtml));
     document.body.appendChild(exportSurface);
 
     try {
@@ -526,28 +526,32 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     }
 
     const root = createDiv();
-    root.style.position = 'fixed';
-    root.style.left = '-10000px';
-    root.style.top = '0';
-    root.style.width = '450px';
-    root.style.height = '600px';
-    root.style.visibility = 'hidden';
-    root.style.pointerEvents = 'none';
-    root.style.zIndex = '-1';
+    root.setCssStyles({
+      position: 'fixed',
+      left: '-10000px',
+      top: '0',
+      width: '450px',
+      height: '600px',
+      visibility: 'hidden',
+      pointerEvents: 'none',
+      zIndex: '-1',
+    });
 
     const imagePreview = createDiv();
     imagePreview.className = 'red-image-preview';
     imagePreview.setAttribute('data-template-id', template.id);
     imagePreview.setAttribute('data-rednote-layout', settings.layoutMode);
     imagePreview.setAttribute('style', this.buildPreviewStyle(settings, template));
-    imagePreview.style.width = '450px';
-    imagePreview.style.maxWidth = 'none';
-    imagePreview.style.height = '600px';
-    imagePreview.style.aspectRatio = 'auto';
+    imagePreview.setCssStyles({
+      width: '450px',
+      maxWidth: 'none',
+      height: '600px',
+      aspectRatio: 'auto',
+    });
 
     const header = createDiv();
     header.className = 'red-preview-header';
-    header.innerHTML = this.renderHeader(settings);
+    header.appendChild(sanitizeHTMLToDom(this.renderHeader(settings)));
 
     const content = createDiv();
     content.className = 'red-preview-content';
@@ -563,7 +567,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const footer = createDiv();
     footer.className = 'red-preview-footer';
-    footer.innerHTML = this.renderFooter(settings);
+    footer.appendChild(sanitizeHTMLToDom(this.renderFooter(settings)));
 
     contentContainer.appendChild(section);
     contentWrapper.appendChild(contentContainer);
@@ -576,14 +580,18 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     return {
       canFit: (title: string, nodes: Element[]) => {
-        section.innerHTML = this.renderContentSection(
-          {
-            kind: 'content',
-            title,
-            bodyHtml: this.buildCardBody(nodes),
-            fileName: '',
-          },
-          settings
+        section.replaceChildren(
+          sanitizeHTMLToDom(
+            this.renderContentSection(
+              {
+                kind: 'content',
+                title,
+                bodyHtml: this.buildCardBody(nodes),
+                fileName: '',
+              },
+              settings
+            )
+          )
         );
 
         return this.contentFitsMeasuredSection(imagePreview, section);
@@ -640,10 +648,12 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
         return;
       }
 
-      image.style.width = '100%';
-      image.style.height = 'auto';
-      image.style.aspectRatio = '16 / 9';
-      image.style.objectFit = 'cover';
+      image.setCssStyles({
+        width: '100%',
+        height: 'auto',
+        aspectRatio: '16 / 9',
+        objectFit: 'cover',
+      });
     });
   }
 
@@ -1162,7 +1172,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const header = doc.createElement('div');
     header.className = 'red-preview-header';
-    header.innerHTML = this.renderHeader(settings);
+    header.appendChild(sanitizeHTMLToDom(this.renderHeader(settings)));
 
     const content = doc.createElement('div');
     content.className = 'red-preview-content';
@@ -1180,9 +1190,9 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
       if (card.kind === 'cover') {
         section.classList.add('jacky-cover-section');
-        section.innerHTML = this.renderCoverSection(card, settings);
+        section.appendChild(sanitizeHTMLToDom(this.renderCoverSection(card, settings)));
       } else {
-        section.innerHTML = this.renderContentSection(card, settings);
+        section.appendChild(sanitizeHTMLToDom(this.renderContentSection(card, settings)));
       }
 
       contentContainer.appendChild(section);
@@ -1193,7 +1203,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const footer = doc.createElement('div');
     footer.className = 'red-preview-footer';
-    footer.innerHTML = this.renderFooter(settings);
+    footer.appendChild(sanitizeHTMLToDom(this.renderFooter(settings)));
 
     imagePreview.appendChild(header);
     imagePreview.appendChild(content);
@@ -1204,11 +1214,23 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
 
     const nav = doc.createElement('div');
     nav.className = 'red-nav-container';
-    nav.innerHTML = `
-      <button class="red-nav-button" data-rednote-nav="prev" type="button">←</button>
-      <span class="red-page-indicator">1/${cards.length}</span>
-      <button class="red-nav-button" data-rednote-nav="next" type="button">→</button>
-    `;
+    const previousButton = doc.createElement('button');
+    previousButton.className = 'red-nav-button';
+    previousButton.setAttribute('data-rednote-nav', 'prev');
+    previousButton.type = 'button';
+    previousButton.textContent = '←';
+
+    const pageIndicator = doc.createElement('span');
+    pageIndicator.className = 'red-page-indicator';
+    pageIndicator.textContent = `1/${cards.length}`;
+
+    const nextButton = doc.createElement('button');
+    nextButton.className = 'red-nav-button';
+    nextButton.setAttribute('data-rednote-nav', 'next');
+    nextButton.type = 'button';
+    nextButton.textContent = '→';
+
+    nav.append(previousButton, pageIndicator, nextButton);
 
     wrapper.appendChild(previewContainer);
     wrapper.appendChild(nav);
@@ -1364,8 +1386,10 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     const frameBackground = this.getFrameBackgroundForCapture(imagePreview);
     const fallbackBackgroundColor = this.getFallbackBackgroundColor(frameBackground);
 
-    imagePreview.style.background = frameBackground;
-    imagePreview.style.backgroundColor = fallbackBackgroundColor;
+    imagePreview.setCssStyles({
+      background: frameBackground,
+      backgroundColor: fallbackBackgroundColor,
+    });
 
     let blob: Blob | null = null;
     try {
@@ -1378,8 +1402,10 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
         backgroundColor: fallbackBackgroundColor,
       });
     } finally {
-      imagePreview.style.background = originalBackground;
-      imagePreview.style.backgroundColor = originalBackgroundColor;
+      imagePreview.setCssStyles({
+        background: originalBackground,
+        backgroundColor: originalBackgroundColor,
+      });
     }
 
     if (!blob) {

@@ -1,7 +1,7 @@
 {
   "id": "mdflow-publisher",
   "name": "Jacky-mdflow",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "minAppVersion": "1.7.2",
   "description": "Turn Markdown notes into ready-to-publish layouts for WeChat Official Accounts, X Articles, and Xiaohongshu.",
   "author": "Jackywxsz",

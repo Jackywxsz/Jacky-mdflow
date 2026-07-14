@@ -1,6 +1,6 @@
 {
   "name": "mdflow-publisher",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Jacky-mdflow Obsidian 全平台内容分发插件",
   "license": "AGPL-3.0-only",
   "main": "main.js",

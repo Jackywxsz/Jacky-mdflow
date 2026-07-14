@@ -36,12 +36,44 @@ const assetPlugin = {
 	},
 };
 
+const safeSchedulingPlugin = {
+	name: "safe-scheduling",
+	setup(build) {
+		build.onResolve({ filter: /^lie$/ }, () => ({
+			path: "native-promise",
+			namespace: "safe-scheduling",
+		}));
+		build.onResolve({ filter: /^setimmediate$/ }, () => ({
+			path: "native-set-immediate",
+			namespace: "safe-scheduling",
+		}));
+		build.onLoad({ filter: /.*/, namespace: "safe-scheduling" }, (args) => {
+			if (args.path === "native-promise") {
+				return { contents: "module.exports = Promise;", loader: "js" };
+			}
+
+			return {
+				contents: `
+if (typeof globalThis.setImmediate !== "function") {
+  globalThis.setImmediate = (callback, ...args) => globalThis.setTimeout(callback, 0, ...args);
+  globalThis.clearImmediate = (id) => globalThis.clearTimeout(id);
+}
+`,
+				loader: "js",
+			};
+		});
+	},
+};
+
 const context = await esbuild.context({
 	banner: {
 		js: banner,
 	},
 	entryPoints: ["src/main.ts"],
 	bundle: true,
+	alias: {
+		jszip: path.resolve("node_modules/jszip/lib/index.js"),
+	},
 	external: [
 		"obsidian",
 		"electron",
@@ -58,17 +90,29 @@ const context = await esbuild.context({
 		"@lezer/lr",
 		...builtinModules],
 	format: "cjs",
+	mainFields: ["module", "main"],
 	target: "es2018",
 	logLevel: "info",
 	sourcemap: prod ? false : "inline",
 	treeShaking: true,
 	minify: prod,
 	outfile,
-	plugins: [assetPlugin],
+	plugins: [safeSchedulingPlugin, assetPlugin],
 });
 
 if (prod) {
 	await context.rebuild();
+	const bundle = await fs.readFile(outfile, "utf8");
+	const forbiddenReleasePatterns = [
+		["dynamic script creation", /createElement\((["'])script\1\)/],
+		["dynamic Function constructor", /new Function\(/],
+	];
+	for (const [label, pattern] of forbiddenReleasePatterns) {
+		if (pattern.test(bundle)) {
+			throw new Error(`Release bundle contains forbidden ${label}.`);
+		}
+	}
+	await context.dispose();
 	process.exit(0);
 } else {
 	await context.watch();

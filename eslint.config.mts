@@ -29,19 +29,4 @@ export default defineConfig(
     },
   },
   ...obsidianmd.configs.recommended,
-  {
-    files: [
-      'src/exporters/rednote-exporter.ts',
-      'src/exporters/wechat-exporter.ts',
-      'src/exporters/x-exporter.ts',
-      'src/themes/theme-manager.ts',
-    ],
-    rules: {
-      // These modules generate portable HTML for external publishing targets.
-      // Inline styles and inert HTML parsing are part of the exported artifact.
-      'obsidianmd/no-static-styles-assignment': 'off',
-      'no-unsanitized/property': 'off',
-      '@microsoft/sdl/no-inner-html': 'off',
-    },
-  },
 );

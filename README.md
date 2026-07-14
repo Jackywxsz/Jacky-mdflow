@@ -10,6 +10,16 @@
 
 兼容说明：插件 id 和安装目录仍保留 `mdflow-publisher`，避免影响已经安装的用户；显示名称为 `Jacky-mdflow`。
 
+## English overview
+
+Jacky-mdflow is an Obsidian desktop plugin for turning Markdown notes into publish-ready content for multiple platforms.
+
+- WeChat Official Accounts: converts Markdown into styled HTML that can be pasted into the WeChat editor.
+- X Articles: copies long-form text with numbered image placeholders and exports the related images as a ZIP archive.
+- RedNote (Xiaohongshu): creates paginated 3:4 content cards and exports individual images or a complete ZIP archive.
+
+The plugin does not require an account, collect telemetry, or upload notes to the author's server. Network requests are only made when a note contains external images that need to be rendered or exported.
+
 ## 当前能力
 
 ### 微信公众号

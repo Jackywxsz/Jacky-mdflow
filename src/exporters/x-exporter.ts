@@ -434,44 +434,52 @@ export class XArticlesExporter implements PlatformExporter<XPreparedData> {
     doc.body.appendChild(article);
 
     article.querySelectorAll('h1').forEach((heading) => {
-      heading.setAttribute(
-        'style',
-        'font-size: 2.2em; line-height: 1.2; margin: 0 0 20px; font-weight: 800; letter-spacing: -0.03em;'
-      );
+      heading.setCssStyles({
+        fontSize: '2.2em',
+        lineHeight: '1.2',
+        margin: '0 0 20px',
+        fontWeight: '800',
+        letterSpacing: '-0.03em',
+      });
     });
 
     article.querySelectorAll('h2').forEach((heading) => {
-      heading.setAttribute(
-        'style',
-        'font-size: 1.5em; line-height: 1.35; margin: 36px 0 14px; font-weight: 750;'
-      );
+      heading.setCssStyles({
+        fontSize: '1.5em',
+        lineHeight: '1.35',
+        margin: '36px 0 14px',
+        fontWeight: '750',
+      });
     });
 
     article.querySelectorAll('h3').forEach((heading) => {
-      heading.setAttribute(
-        'style',
-        'font-size: 1.2em; line-height: 1.4; margin: 28px 0 12px; font-weight: 700; color: #1d4ed8;'
-      );
+      heading.setCssStyles({
+        fontSize: '1.2em',
+        lineHeight: '1.4',
+        margin: '28px 0 12px',
+        fontWeight: '700',
+        color: '#1d4ed8',
+      });
     });
 
     article.querySelectorAll('p').forEach((paragraph, index) => {
-      const base = 'margin: 16px 0;';
       if (index === 0) {
-        paragraph.setAttribute(
-          'style',
-          `${base} font-size: 1.08em; color: #334155;`
-        );
+        paragraph.setCssStyles({
+          margin: '16px 0',
+          fontSize: '1.08em',
+          color: '#334155',
+        });
       } else {
-        paragraph.setAttribute('style', base);
+        paragraph.setCssStyles({ margin: '16px 0' });
       }
     });
 
-    article.querySelectorAll('ul, ol').forEach((list) => {
-      list.setAttribute('style', 'margin: 18px 0; padding-left: 1.4em;');
+    article.querySelectorAll<HTMLElement>('ul, ol').forEach((list) => {
+      list.setCssStyles({ margin: '18px 0', paddingLeft: '1.4em' });
     });
 
     article.querySelectorAll('li').forEach((item) => {
-      item.setAttribute('style', 'margin: 10px 0;');
+      item.setCssStyles({ margin: '10px 0' });
     });
 
     article.querySelectorAll('blockquote').forEach((blockquote) => {
@@ -506,21 +514,31 @@ export class XArticlesExporter implements PlatformExporter<XPreparedData> {
 
     article.querySelectorAll('code').forEach((code) => {
       if (code.parentElement?.tagName.toLowerCase() === 'pre') return;
-      code.setAttribute(
-        'style',
-        'font-family: "SF Mono", Consolas, monospace; font-size: 0.9em; background: #f1f5f9; border-radius: 6px; padding: 2px 6px;'
-      );
+      code.setCssStyles({
+        fontFamily: '"SF Mono", Consolas, monospace',
+        fontSize: '0.9em',
+        background: '#f1f5f9',
+        borderRadius: '6px',
+        padding: '2px 6px',
+      });
     });
 
     article.querySelectorAll('a').forEach((anchor) => {
-      anchor.setAttribute('style', 'color: #2563eb; text-decoration: none; border-bottom: 1px solid #93c5fd;');
+      anchor.setCssStyles({
+        color: '#2563eb',
+        textDecoration: 'none',
+        borderBottom: '1px solid #93c5fd',
+      });
     });
 
     article.querySelectorAll('img').forEach((img) => {
-      img.setAttribute(
-        'style',
-        'max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; display: block;'
-      );
+      img.setCssStyles({
+        maxWidth: '100%',
+        height: 'auto',
+        borderRadius: '8px',
+        margin: '16px 0',
+        display: 'block',
+      });
     });
   }
 }

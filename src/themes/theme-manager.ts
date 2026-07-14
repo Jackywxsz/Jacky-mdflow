@@ -1,3 +1,4 @@
+import { sanitizeHTMLToDom } from 'obsidian';
 import { Theme, ThemeId } from './theme-types';
 import { PRESET_THEMES } from './presets/index';
 
@@ -99,7 +100,7 @@ export class ThemeManager {
     // Wrap everything in a container with the theme's container style
     const container = doc.createElement('div');
     container.setAttribute('style', style.container);
-    container.innerHTML = doc.body.innerHTML;
+    container.appendChild(sanitizeHTMLToDom(doc.body.innerHTML));
 
     return container.outerHTML;
   }

@@ -75,12 +75,16 @@ export class WeChatExporter implements PlatformExporter {
       if (images.length === 0) return;
 
       const table = doc.createElement('table');
-      table.setAttribute('style', 'width: 100%; border-collapse: collapse; margin: 20px 0;');
+      table.setCssStyles({
+        width: '100%',
+        borderCollapse: 'collapse',
+        margin: '20px 0',
+      });
 
       const row = doc.createElement('tr');
       images.forEach((img) => {
         const td = doc.createElement('td');
-        td.setAttribute('style', 'padding: 4px; border: none;');
+        td.setCssStyles({ padding: '4px', border: 'none' });
         td.appendChild(img.cloneNode(true));
         row.appendChild(td);
       });
