@@ -367,7 +367,7 @@ export class MDFlowView extends ItemView {
       container.querySelectorAll('.mdflow-tab').forEach((currentTab) => currentTab.removeClass('active'));
       tab.addClass('active');
       this.updateToolbarForPlatform();
-      void this.refreshPreview();
+      void this.updatePreview(undefined, this.activeFile || undefined);
     });
   }
 
@@ -543,7 +543,11 @@ export class MDFlowView extends ItemView {
       const markdown = markdownOverride ?? await this.readCurrentMarkdown(activeFile, preferLiveMarkdown);
       if (runId !== this.previewRunId) return;
 
-      const renderedHtml = await this.converter.convertToHtml(markdown, activeFile);
+      const renderedHtml = await this.converter.convertToHtml(
+        markdown,
+        activeFile,
+        this.currentPlatform === 'rednote'
+      );
       if (runId !== this.previewRunId) return;
 
       this.renderedHtml = renderedHtml;

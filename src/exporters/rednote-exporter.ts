@@ -413,7 +413,7 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   ): RedNoteCard[] {
     if (settings.layoutMode === 'heading-sections') {
       return sections.flatMap((section) => {
-        const entries = this.createPaginationEntries(section.nodes);
+        const entries = this.createPaginationEntries(section.nodes, true);
         return this.paginateEntries(section.title, entries, settings, template);
       });
     }
@@ -422,14 +422,18 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
     if (!firstSection) return [];
 
     const entries = this.createPaginationEntries(
-      sections.flatMap((section) => section.nodes)
+      sections.flatMap((section) => section.nodes),
+      false
     );
     return this.paginateEntries(firstSection.title, entries, settings, template);
   }
 
-  private createPaginationEntries(nodes: Element[]): PaginationEntry[] {
+  private createPaginationEntries(
+    nodes: Element[],
+    forceBreakOnHorizontalRule: boolean
+  ): PaginationEntry[] {
     return nodes.map((node) => {
-      if (node.tagName.toLowerCase() === 'hr') {
+      if (forceBreakOnHorizontalRule && node.tagName.toLowerCase() === 'hr') {
         return { node: null, forceBreakBefore: true };
       }
 
@@ -1020,6 +1024,10 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   }
 
   private decorateContent(container: HTMLElement): void {
+    container.querySelectorAll('.mdflow-source-spacer').forEach((spacer) => {
+      spacer.setAttribute('style', 'display: block; height: 1.2em; margin: 0;');
+    });
+
     container.querySelectorAll('strong, em, mark').forEach((element) => {
       element.classList.add('red-emphasis');
     });
