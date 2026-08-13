@@ -667,6 +667,140 @@
   margin-top: 0;
 }
 
+.mdflow-source-spacer {
+  display: block;
+  height: 1.2em;
+  margin: 0;
+}
+
+/* Pure Blue: a quiet, borderless reading surface for Obsidian flow cards. */
+.red-image-preview[data-template-id="pure-blue"][data-rednote-layout="obsidian-flow"] {
+  padding: 28px 32px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: #ffffff;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-preview-header {
+  padding-bottom: 34px;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-user-info {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-user-left {
+  display: contents;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-user-avatar {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 44px;
+  height: 44px;
+  box-shadow: none;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-user-meta {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-avatar-placeholder {
+  font-size: 17px;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-user-name {
+  font-size: calc(var(--rn-meta-size) + 3px);
+  font-weight: 800;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-verified-icon,
+.red-image-preview[data-template-id="pure-blue"] .red-user-id,
+.red-image-preview[data-template-id="pure-blue"] .red-preview-footer {
+  display: none;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-user-right {
+  display: block;
+  grid-column: 2;
+  grid-row: 2;
+  align-self: start;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-preview-badge {
+  display: none;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-post-time {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-preview-content {
+  padding-bottom: 0;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .mdflow-rednote-flow-shell {
+  padding: 0;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .mdflow-rednote-flow-body {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  line-height: 1.75;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .mdflow-rednote-flow-body h1,
+.red-image-preview[data-template-id="pure-blue"] .mdflow-rednote-flow-body h2,
+.red-image-preview[data-template-id="pure-blue"] .mdflow-rednote-flow-body h3 {
+  color: #2563eb;
+  letter-spacing: -0.01em;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .mdflow-rednote-flow-body li::marker {
+  color: #2563eb;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-emphasis {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-weight: inherit;
+}
+
+.red-image-preview[data-template-id="pure-blue"] strong.red-emphasis {
+  padding: 0 0.04em;
+  background: linear-gradient(
+    to top,
+    rgba(147, 197, 253, 0.55) 0,
+    rgba(147, 197, 253, 0.55) 45%,
+    transparent 45%,
+    transparent 100%
+  );
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  font-weight: 850;
+}
+
+.red-image-preview[data-template-id="pure-blue"] .red-image {
+  border-radius: 10px;
+  box-shadow: none;
+  background: transparent;
+}
+
 .jacky-cover-section {
   padding: 0 !important;
   margin: 0 !important;

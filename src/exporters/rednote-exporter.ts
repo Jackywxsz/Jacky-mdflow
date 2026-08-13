@@ -1024,10 +1024,6 @@ export class RedNoteExporter implements PlatformExporter<RedNotePreparedData> {
   }
 
   private decorateContent(container: HTMLElement): void {
-    container.querySelectorAll('.mdflow-source-spacer').forEach((spacer) => {
-      spacer.setAttribute('style', 'display: block; height: 1.2em; margin: 0;');
-    });
-
     container.querySelectorAll('strong, em, mark').forEach((element) => {
       element.classList.add('red-emphasis');
     });
