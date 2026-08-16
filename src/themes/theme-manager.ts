@@ -1,6 +1,7 @@
 import { sanitizeHTMLToDom } from 'obsidian';
 import { Theme, ThemeId } from './theme-types';
 import { PRESET_THEMES } from './presets/index';
+import { renderEnhancedTheme } from './wechat-theme-renderer';
 
 export class ThemeManager {
   private themes: Map<string, Theme>;
@@ -41,8 +42,16 @@ export class ThemeManager {
     const theme = this.getCurrentTheme();
     const style = theme.styles;
 
+    const sanitizedContainer = document.createElement('section');
+    sanitizedContainer.appendChild(sanitizeHTMLToDom(html));
+    const safeHtml = sanitizedContainer.innerHTML;
+
+    if (theme.enhanced) {
+      return renderEnhancedTheme(safeHtml, theme);
+    }
+
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
+    const doc = parser.parseFromString(safeHtml, 'text/html');
 
     const headingInlineOverrides: Record<string, string> = {
       strong: 'font-weight: 700; color: inherit !important; background-color: transparent !important;',
@@ -98,9 +107,11 @@ export class ThemeManager {
     });
 
     // Wrap everything in a container with the theme's container style
-    const container = doc.createElement('div');
+    const container = doc.createElement('section');
     container.setAttribute('style', style.container);
-    container.appendChild(sanitizeHTMLToDom(doc.body.innerHTML));
+    while (doc.body.firstChild) {
+      container.appendChild(doc.body.firstChild);
+    }
 
     return container.outerHTML;
   }

@@ -1,8 +1,11 @@
 import { Theme } from '../theme-types';
+import { GZH_PRESET_THEMES } from './gzh';
 
 export const PRESET_THEMES: Record<string, Theme> = {
+  ...GZH_PRESET_THEMES,
   'wechat-default': {
     name: '默认公众号',
+    group: 'classic',
     styles: {
       container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #3f3f3f !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 24px; font-weight: 600; color: #2c3e50 !important; line-height: 1.4 !important; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #3498db;',
@@ -32,6 +35,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
 
   'wechat-tech': {
     name: '技术风格',
+    group: 'classic',
     styles: {
       container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; font-size: 16px; line-height: 1.8 !important; color: #333 !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 26px; font-weight: 700; color: #0066cc !important; line-height: 1.3 !important; margin: 36px 0 18px; border-bottom: 2px solid #0066cc; padding-bottom: 10px;',
@@ -61,6 +65,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
 
   'latepost-depth': {
     name: '晚点风格',
+    group: 'classic',
     styles: {
       container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Serif SC", Georgia, serif; font-size: 17px; line-height: 1.9 !important; color: #1a1a1a !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 28px; font-weight: 700; color: #d32f2f !important; line-height: 1.3 !important; margin: 40px 0 20px; letter-spacing: -0.5px;',
@@ -90,6 +95,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
 
   'wechat-anthropic': {
     name: 'Claude 风格',
+    group: 'classic',
     styles: {
       container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #3d2b1f !important; background-color: #faf8f5 !important; word-wrap: break-word;',
       h1: 'font-size: 26px; font-weight: 700; background: linear-gradient(135deg, #C15F3C, #e8854d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.3 !important; margin: 36px 0 18px;',
@@ -119,6 +125,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
 
   'wechat-ft': {
     name: '金融时报',
+    group: 'classic',
     styles: {
       container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: Georgia, "Times New Roman", "Noto Serif SC", serif; font-size: 17px; line-height: 1.9 !important; color: #333 !important; background-color: #fff1e5 !important; word-wrap: break-word;',
       h1: 'font-size: 32px; font-weight: 700; color: #1a1a1a !important; line-height: 1.2 !important; margin: 40px 0 20px; font-family: Georgia, serif;',
@@ -148,6 +155,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
 
   'wechat-elegant': {
     name: '优雅衬线',
+    group: 'classic',
     styles: {
       container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: "Noto Serif SC", "SimSun", Georgia, serif; font-size: 17px; line-height: 2 !important; color: #2c2c2c !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 28px; font-weight: 700; color: #1a1a1a !important; line-height: 1.4 !important; margin: 40px 0 20px; text-align: center; letter-spacing: 2px;',
@@ -177,6 +185,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
 
   'warm-docs': {
     name: '焦橙文档',
+    group: 'classic',
     styles: {
       container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #1c1917 !important; background-color: #FAFAF9 !important; word-wrap: break-word;',
       h1: 'font-size: 28px; font-weight: 700; color: #C2410C !important; line-height: 1.3 !important; margin: 40px 0 20px; border-bottom: 2px solid #fdba74; padding-bottom: 10px;',

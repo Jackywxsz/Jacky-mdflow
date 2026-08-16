@@ -102,14 +102,30 @@ export class MDFlowView extends ItemView {
     this.themeSelector.createSpan({ text: '主题: ' });
     const themeSelect = this.themeSelector.createEl('select', { cls: 'mdflow-theme-select' });
 
-    this.themeManager.getThemeIds().forEach((id) => {
-      const theme = this.themeManager.getTheme(id);
-      if (!theme) return;
+    const themeGroups = [
+      { id: 'enhanced', label: '增强主题' },
+      { id: 'classic', label: '经典主题' },
+    ] as const;
 
-      const option = themeSelect.createEl('option', { value: id, text: theme.name });
-      if (id === this.themeManager.getCurrentThemeId()) {
-        option.selected = true;
-      }
+    themeGroups.forEach((group) => {
+      const optionGroup = document.createElement('optgroup');
+      optionGroup.label = group.label;
+
+      this.themeManager.getThemeIds().forEach((id) => {
+        const theme = this.themeManager.getTheme(id);
+        const themeGroup = theme?.group || 'classic';
+        if (!theme || themeGroup !== group.id) return;
+
+        const option = document.createElement('option');
+        option.value = id;
+        option.textContent = theme.description
+          ? `${theme.name} · ${theme.description}`
+          : theme.name;
+        option.selected = id === this.themeManager.getCurrentThemeId();
+        optionGroup.appendChild(option);
+      });
+
+      themeSelect.appendChild(optionGroup);
     });
 
     themeSelect.addEventListener('change', () => {
