@@ -1231,32 +1231,41 @@
   font-size: 13px;
 }
 
-.mdflow-about-social-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+.mdflow-about-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 12px;
 }
 
-.mdflow-about-social-card {
-  border-radius: 14px;
-  overflow: hidden;
+.mdflow-about-contact-item {
+  padding: 12px 14px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.72);
   border: 1px solid rgba(193, 122, 78, 0.14);
-  text-align: center;
 }
 
-.mdflow-about-social-image {
-  width: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-.mdflow-about-social-label {
-  padding: 6px 0 8px;
+.mdflow-about-contact-label {
+  margin-bottom: 4px;
+  color: rgba(75, 40, 24, 0.58);
   font-size: 12px;
   font-weight: 600;
-  color: rgba(75, 40, 24, 0.72);
+}
+
+.mdflow-about-contact-value {
+  color: #4b2818;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.mdflow-about-link {
+  color: #9a4a24;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.mdflow-about-link:hover {
+  text-decoration: underline;
 }
 
 .mdflow-about-footer {

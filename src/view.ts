@@ -265,13 +265,11 @@ export class MDFlowView extends ItemView {
     popover.createDiv({ cls: 'mdflow-rn-guide-title', text: '使用指南' });
     const guideContent = popover.createDiv({ cls: 'mdflow-rn-guide-content' });
     const guideItems: Array<[string, string]> = [
-      ['核心用法', '用二级标题(##)标记分节，内容会自动排满页面'],
-      ['排版模式', '切到正文卡片流后，二级标题会作为正文小标题，不再强制分页'],
-      ['内容分页', '需要固定换页时使用 ---，否则会根据文字、图片和代码块自动分页'],
-      ['首图制作', '单独调整首节字号至 20-24px，使用【下载当前页】导出'],
-      ['长文优化', '内容较多的章节可调小字号至 14-16px 后单独导出'],
-      ['批量操作', '保持统一字号时，用【导出全部页】批量生成'],
-      ['模板切换', '顶部选择器可切换不同视觉风格'],
+      ['选择平台', '顶部切换微信公众号、X Articles 或小红书，三套排版互不影响'],
+      ['实时预览', '继续编辑 Markdown，预览会随正文和图片同步更新'],
+      ['微信公众号', '选择增强或经典主题，确认预览后复制到公众号编辑器'],
+      ['X Articles', '确认预览后复制 X Articles 格式，粘贴即可发布'],
+      ['小红书', '选择排版、模板、字体和字号；用 --- 固定换页，可下载当前页或导出全部页'],
     ];
 
     guideItems.forEach(([title, description], index) => {
