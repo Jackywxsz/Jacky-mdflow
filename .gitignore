@@ -3,3 +3,4 @@ main.js
 *.js.map
 .DS_Store
 data.json
+.local-backups/

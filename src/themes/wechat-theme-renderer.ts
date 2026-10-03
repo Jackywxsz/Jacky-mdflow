@@ -95,12 +95,14 @@ function decorateStructure(doc: Document, theme: Theme): void {
   const enhanced = theme.enhanced;
   if (!enhanced) return;
 
-  doc.querySelectorAll('h2').forEach((heading, index) => {
-    const badge = doc.createElement('span');
-    badge.setAttribute('style', enhanced.h2Number);
-    badge.textContent = String(index + 1).padStart(2, '0');
-    heading.insertBefore(badge, heading.firstChild);
-  });
+  if (enhanced.h2Number) {
+    doc.querySelectorAll('h2').forEach((heading, index) => {
+      const badge = doc.createElement('span');
+      badge.setAttribute('style', enhanced.h2Number);
+      badge.textContent = String(index + 1).padStart(2, '0');
+      heading.insertBefore(badge, heading.firstChild);
+    });
+  }
 
   doc.querySelectorAll('blockquote').forEach((blockquote) => {
     if (isOpeningQuote(blockquote)) {

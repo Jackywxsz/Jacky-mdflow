@@ -1,13 +1,15 @@
 import { Theme } from '../theme-types';
 import { GZH_PRESET_THEMES } from './gzh';
+import { ORANGE_READING_THEME } from './orange-reading';
 
 export const PRESET_THEMES: Record<string, Theme> = {
+  'wechat-orange-reading': ORANGE_READING_THEME,
   ...GZH_PRESET_THEMES,
   'wechat-default': {
     name: '默认公众号',
     group: 'classic',
     styles: {
-      container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #3f3f3f !important; background-color: #fff !important; word-wrap: break-word;',
+      container: 'max-width: 677px; margin: 0 auto; padding: 10px 0 20px; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #3f3f3f !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 24px; font-weight: 600; color: #2c3e50 !important; line-height: 1.4 !important; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #3498db;',
       h2: 'font-size: 22px; font-weight: 600; color: #2c3e50 !important; line-height: 1.4 !important; margin: 28px 0 14px; padding-left: 12px; border-left: 4px solid #3498db;',
       h3: 'font-size: 20px; font-weight: 600; color: #34495e !important; line-height: 1.4 !important; margin: 24px 0 12px;',
@@ -37,7 +39,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
     name: '技术风格',
     group: 'classic',
     styles: {
-      container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; font-size: 16px; line-height: 1.8 !important; color: #333 !important; background-color: #fff !important; word-wrap: break-word;',
+      container: 'max-width: 677px; margin: 0 auto; padding: 10px 0 20px; box-sizing: border-box; font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif; font-size: 16px; line-height: 1.8 !important; color: #333 !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 26px; font-weight: 700; color: #0066cc !important; line-height: 1.3 !important; margin: 36px 0 18px; border-bottom: 2px solid #0066cc; padding-bottom: 10px;',
       h2: 'font-size: 22px; font-weight: 700; color: #0066cc !important; line-height: 1.3 !important; margin: 30px 0 14px; border-left: 4px solid #0066cc; padding-left: 12px; background: #f0f7ff; padding: 8px 12px;',
       h3: 'font-size: 20px; font-weight: 600; color: #1a6699 !important; line-height: 1.3 !important; margin: 24px 0 12px;',
@@ -67,7 +69,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
     name: '晚点风格',
     group: 'classic',
     styles: {
-      container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Serif SC", Georgia, serif; font-size: 17px; line-height: 1.9 !important; color: #1a1a1a !important; background-color: #fff !important; word-wrap: break-word;',
+      container: 'max-width: 677px; margin: 0 auto; padding: 10px 0 20px; box-sizing: border-box; font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Serif SC", Georgia, serif; font-size: 17px; line-height: 1.9 !important; color: #1a1a1a !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 28px; font-weight: 700; color: #d32f2f !important; line-height: 1.3 !important; margin: 40px 0 20px; letter-spacing: -0.5px;',
       h2: 'font-size: 22px; font-weight: 700; color: #1a1a1a !important; line-height: 1.3 !important; margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #d32f2f;',
       h3: 'font-size: 20px; font-weight: 600; color: #333 !important; line-height: 1.3 !important; margin: 28px 0 14px;',
@@ -97,7 +99,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
     name: 'Claude 风格',
     group: 'classic',
     styles: {
-      container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #3d2b1f !important; background-color: #faf8f5 !important; word-wrap: break-word;',
+      container: 'max-width: 677px; margin: 0 auto; padding: 10px 0 20px; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #3d2b1f !important; background-color: #faf8f5 !important; word-wrap: break-word;',
       h1: 'font-size: 26px; font-weight: 700; background: linear-gradient(135deg, #C15F3C, #e8854d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.3 !important; margin: 36px 0 18px;',
       h2: 'font-size: 22px; font-weight: 600; color: #C15F3C !important; line-height: 1.3 !important; margin: 28px 0 14px; padding-left: 12px; border-left: 4px solid #C15F3C;',
       h3: 'font-size: 20px; font-weight: 600; color: #a04a2a !important; line-height: 1.3 !important; margin: 24px 0 12px;',
@@ -127,7 +129,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
     name: '金融时报',
     group: 'classic',
     styles: {
-      container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: Georgia, "Times New Roman", "Noto Serif SC", serif; font-size: 17px; line-height: 1.9 !important; color: #333 !important; background-color: #fff1e5 !important; word-wrap: break-word;',
+      container: 'max-width: 677px; margin: 0 auto; padding: 10px 0 20px; box-sizing: border-box; font-family: Georgia, "Times New Roman", "Noto Serif SC", serif; font-size: 17px; line-height: 1.9 !important; color: #333 !important; background-color: #fff1e5 !important; word-wrap: break-word;',
       h1: 'font-size: 32px; font-weight: 700; color: #1a1a1a !important; line-height: 1.2 !important; margin: 40px 0 20px; font-family: Georgia, serif;',
       h2: 'font-size: 24px; font-weight: 700; color: #1a1a1a !important; line-height: 1.3 !important; margin: 32px 0 16px; font-family: Georgia, serif;',
       h3: 'font-size: 20px; font-weight: 700; color: #990f3d !important; line-height: 1.3 !important; margin: 28px 0 14px;',
@@ -157,7 +159,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
     name: '优雅衬线',
     group: 'classic',
     styles: {
-      container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: "Noto Serif SC", "SimSun", Georgia, serif; font-size: 17px; line-height: 2 !important; color: #2c2c2c !important; background-color: #fff !important; word-wrap: break-word;',
+      container: 'max-width: 677px; margin: 0 auto; padding: 10px 0 20px; box-sizing: border-box; font-family: "Noto Serif SC", "SimSun", Georgia, serif; font-size: 17px; line-height: 2 !important; color: #2c2c2c !important; background-color: #fff !important; word-wrap: break-word;',
       h1: 'font-size: 28px; font-weight: 700; color: #1a1a1a !important; line-height: 1.4 !important; margin: 40px 0 20px; text-align: center; letter-spacing: 2px;',
       h2: 'font-size: 22px; font-weight: 700; color: #1a1a1a !important; line-height: 1.4 !important; margin: 32px 0 16px; text-align: center; letter-spacing: 1px;',
       h3: 'font-size: 20px; font-weight: 600; color: #333 !important; line-height: 1.4 !important; margin: 28px 0 14px;',
@@ -171,7 +173,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
       ul: 'margin: 18px 0; padding-left: 24px;',
       ol: 'margin: 18px 0; padding-left: 24px;',
       li: 'margin: 10px 0; line-height: 2 !important;',
-      blockquote: 'margin: 24px 40px; padding: 16px; border: 1px solid #ccc; color: #555 !important; font-style: italic; background-color: #fafafa !important;',
+      blockquote: 'margin: 24px 0; padding: 16px; border: 1px solid #ccc; color: #555 !important; font-style: italic; background-color: #fafafa !important;',
       code: 'font-family: "SF Mono", Consolas, Monaco, monospace; font-size: 14px; padding: 2px 6px; background-color: #f5f5f5 !important; color: #333 !important; border-radius: 3px;',
       pre: 'margin: 24px 0; padding: 16px; background-color: #2d2d2d !important; border-radius: 4px; overflow-x: auto; line-height: 1.6 !important;',
       hr: 'margin: 40px auto; border: none; border-top: 1px solid #ccc; width: 60%;',
@@ -187,7 +189,7 @@ export const PRESET_THEMES: Record<string, Theme> = {
     name: '焦橙文档',
     group: 'classic',
     styles: {
-      container: 'max-width: 740px; margin: 0 auto; padding: 10px 12px 20px 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #1c1917 !important; background-color: #FAFAF9 !important; word-wrap: break-word;',
+      container: 'max-width: 677px; margin: 0 auto; padding: 10px 0 20px; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; line-height: 1.8 !important; color: #1c1917 !important; background-color: #FAFAF9 !important; word-wrap: break-word;',
       h1: 'font-size: 28px; font-weight: 700; color: #C2410C !important; line-height: 1.3 !important; margin: 40px 0 20px; border-bottom: 2px solid #fdba74; padding-bottom: 10px;',
       h2: 'font-size: 22px; font-weight: 700; color: #9a3412 !important; line-height: 1.3 !important; margin: 32px 0 16px; padding-left: 12px; border-left: 4px solid #C2410C;',
       h3: 'font-size: 20px; font-weight: 600; color: #7c2d12 !important; line-height: 1.3 !important; margin: 28px 0 14px;',

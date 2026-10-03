@@ -1,5 +1,8 @@
 import { Theme, ThemeStyles, WeChatEnhancedStyles } from '../theme-types';
 
+// Enhanced themes adapted from gzh-design-skill by 甲木 × 摸鱼小李.
+// Upstream: https://github.com/isjiamu/gzh-design-skill (AGPL-3.0).
+// Keep horizontal padding at zero: the WeChat reader provides the outer gutter.
 interface GzhThemeTokens {
   name: string;
   description: string;
@@ -149,41 +152,41 @@ export const GZH_PRESET_THEMES: Record<string, Theme> = {
     accent: '#059669', accentDark: '#047857', accentSoft: '#ECFDF5', marker: '#FDE68A',
     background: '#FFFFFF', surface: '#F0FDF4', title: '#111827', body: '#374151',
     muted: '#6B7280', line: '#D1D5DB', fontSize: '14px', lineHeight: '1.9',
-    letterSpacing: '0.5px', padding: '12px 20px 28px',
+    letterSpacing: '0.5px', padding: '12px 0 28px',
   }),
   'gzh-red-white': createGzhTheme({
     name: '红白编辑', description: '观点、深度分析、人物内容', variant: 'editorial',
     accent: '#DC2626', accentDark: '#991B1B', accentSoft: '#FEE2E2', marker: '#FECACA',
     background: '#FFFFFF', surface: '#FEF2F2', title: '#1C1917', body: '#374151',
     muted: '#9CA3AF', line: '#E5E7EB', fontSize: '15px', lineHeight: '1.8',
-    letterSpacing: '0.5px', padding: '12px 10px 28px',
+    letterSpacing: '0.5px', padding: '12px 0 28px',
   }),
   'gzh-graphite-minimal': createGzhTheme({
     name: '石墨极简', description: '科技评论、专业观点、高端品牌', variant: 'minimal',
     accent: '#52525B', accentDark: '#3F3F46', accentSoft: '#F4F4F5', marker: '#E4E4E7',
     background: '#FFFFFF', surface: '#FAFAFA', title: '#27272A', body: '#52525B',
     muted: '#A1A1AA', line: '#E4E4E7', fontSize: '15px', lineHeight: '1.8',
-    letterSpacing: '0.3px', padding: '16px 10px 34px',
+    letterSpacing: '0.3px', padding: '16px 0 34px',
   }),
   'gzh-zen-whitespace': createGzhTheme({
     name: '留白禅意', description: '随笔、人物、生活与读书内容', variant: 'zen',
     accent: '#4A5D52', accentDark: '#3D5046', accentSoft: '#EEF3F0', marker: '#D6E4DC',
     background: '#FFFFFF', surface: '#FFFFFF', title: '#2B2B2B', body: '#525252',
     muted: '#A3A3A3', line: '#E8E8E8', fontSize: '15px', lineHeight: '1.9',
-    letterSpacing: '0.3px', padding: '24px 16px 42px', serifHeadings: true,
+    letterSpacing: '0.3px', padding: '24px 0 42px', serifHeadings: true,
   }),
   'gzh-moyu-ticket': createGzhTheme({
     name: '摸鱼票据', description: '测评、工具对比、创意评测', variant: 'ticket',
     accent: '#059669', accentDark: '#047857', accentSoft: '#F0FDF4', marker: '#A7F3D0',
     background: '#FFFFFF', surface: '#FFFEF8', title: '#1A1A1A', body: '#555555',
     muted: '#888888', line: '#1A1A1A', fontSize: '14px', lineHeight: '1.9',
-    letterSpacing: '0.5px', padding: '16px 20px 34px',
+    letterSpacing: '0.5px', padding: '16px 0 34px',
   }),
   'gzh-olive-journal': createGzhTheme({
     name: '橄榄手记', description: '案例复盘、系统文档、深度评测', variant: 'journal',
     accent: '#ED7B2F', accentDark: '#9A4C1C', accentSoft: '#E5E7E0', marker: '#F0C7A9',
     background: '#FDFDF8', surface: '#EEEFE9', title: '#23251D', body: '#4D4F46',
     muted: '#9EA096', line: '#BFC1B7', fontSize: '14px', lineHeight: '1.9',
-    letterSpacing: '0.3px', padding: '16px 12px 34px',
+    letterSpacing: '0.3px', padding: '16px 0 34px',
   }),
 };

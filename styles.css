@@ -147,6 +147,13 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+.mdflow-preview[data-platform="wechat"] {
+  /* One reader gutter; copied theme HTML adds no horizontal padding. */
+  max-width: 709px;
+  box-sizing: border-box;
+  padding: 16px;
+}
+
 .mdflow-preview[data-platform="x"] {
   background: var(--background-primary);
   box-shadow: none;

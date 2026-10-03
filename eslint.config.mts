@@ -6,6 +6,7 @@ export default defineConfig(
   globalIgnores([
     'node_modules',
     'dist',
+    '.local-backups',
     'esbuild.config.mjs',
     'version-bump.mjs',
     'versions.json',
@@ -21,7 +22,7 @@ export default defineConfig(
       },
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['eslint.config.mts', 'manifest.json'],
+          allowDefaultProject: ['eslint.config.mts', 'manifest.json', 'scripts/check-wechat-runtime.mjs'],
         },
         tsconfigRootDir: import.meta.dirname,
         extraFileExtensions: ['.json'],

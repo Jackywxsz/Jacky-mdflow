@@ -35,6 +35,7 @@ export interface WeChatEnhancedStyles {
   variant: 'magazine' | 'editorial' | 'minimal' | 'zen' | 'ticket' | 'journal';
   accent: string;
   accentSoft: string;
+  /** Empty disables automatic chapter badges for reading-focused themes. */
   h2Number: string;
   openingQuote: string;
   highlight: string;

@@ -27,9 +27,11 @@ The plugin does not require an account, collect telemetry, or upload notes to th
 - Markdown 转公众号可粘贴 HTML
 - 内置“增强主题”和“经典主题”两组公众号排版主题
 - 增强主题包含摸鱼绿、红白编辑、石墨极简、留白禅意、摸鱼票据、橄榄手记
+- 新增「橙色阅读」：参考 APPSO 公开文章的橙色小标题、15px 灰黑正文、1.8 倍行高、26px 段距及圆角配图；不自动添加章节编号，也不叠加正文左右边距
 - 支持章节自动编号、开头引言、主题化引用/提示/列表/表格/代码块/图片说明
 - 支持 `**加粗**`、`==高亮==`、`<u>下划线</u>`、`++下划线++` 等公众号强调语义
 - 预览与复制共用同一份公众号兼容 HTML，减少粘贴后的样式偏差
+- 正文不额外叠加左右留白，适配公众号阅读区；预览保留一层阅读边距，引用与提示卡片保留内部间距
 - 图片自动转 Base64，复制后可直接粘贴到公众号编辑器
 - 使用 Obsidian 原生 `MarkdownRenderer`，兼容内部图片、任务列表、嵌入等常见写法
 
@@ -234,6 +236,8 @@ export OBSIDIAN_VAULT_PATH="/path/to/your/vault"
 npm run deploy
 ```
 
+部署后，在 Obsidian 中重载插件并打开 Jacky-mdflow 面板，再运行 `npm run test:wechat`。此检查在已安装插件的真实 DOM 中验证正文宽度、主题编号与橙色阅读样式，不修改笔记；多个 Vault 同时打开时可用 `npm run test:wechat -- --vault="你的 Vault 名称"` 指定目标。
+
 ## 技术栈
 
 - TypeScript
@@ -244,6 +248,8 @@ npm run deploy
 
 ## 第三方许可
 
+- 微信公众号的六套增强主题（摸鱼绿、红白编辑、石墨极简、留白禅意、摸鱼票据、橄榄手记）与部分 HTML 兼容处理，参考并适配自 [gzh-design-skill](https://github.com/isjiamu/gzh-design-skill)。感谢 **甲木 × 摸鱼小李** 联名共建的主题组件库、排版设计与质量校验标准。原项目版权声明为 **AGPL-3.0 © 2026 甲木 × 摸鱼小李**，详见其 [README](https://github.com/isjiamu/gzh-design-skill#-致谢) 与 [LICENSE](https://github.com/isjiamu/gzh-design-skill/blob/main/LICENSE)。本插件针对 Obsidian 的 Markdown 渲染、预览、剪贴板及公众号阅读宽度进行了适配。
+- 「橙色阅读」的视觉参考来自 [APPSO 的公开文章](https://mp.weixin.qq.com/s/AkMSR8MnOvSSY_3N6jVO0A)（2026-10-03 核验）。它是本插件重新实现的阅读主题，提炼字体层级、段落节奏、橙色标题及圆角图片；引用、列表、表格和代码样式为插件补充的适配设计。
 - [`html-to-image`](https://github.com/bubkoo/html-to-image/blob/master/LICENSE) — MIT License，Copyright (c) 2017-2025 W.Y.
 - [`JSZip`](https://github.com/Stuk/jszip/blob/main/LICENSE.markdown) — 本项目按 MIT License 使用，Copyright (c) 2009-2016 Stuart Knightley、David Duponchel、Franz Buchinger、António Afonso。
 
