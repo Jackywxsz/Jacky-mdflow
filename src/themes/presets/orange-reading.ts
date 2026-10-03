@@ -11,7 +11,7 @@ const note = 'margin:26px 0;padding:12px 0 12px 12px;border-left:3px solid #FD46
 const codeFrame = 'margin:26px 0;padding:14px 12px;background:#f7f7f7;border:1px solid #eeeeee;border-radius:8px;overflow-x:auto;box-sizing:border-box;';
 
 export const ORANGE_READING_THEME: Theme = {
-  name: '橙色阅读',
+  name: '暖橙',
   group: 'enhanced',
   description: '橙色标题、宽正文、圆角配图',
   styles: {

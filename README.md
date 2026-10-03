@@ -1,258 +1,66 @@
 # Jacky-mdflow
 
-在 Obsidian 里完成「Markdown 写作 -> 平台预览 -> 一键复制 / 导出」的内容分发插件。
+把 Obsidian 笔记排版为微信公众号文章、X Articles 长文和小红书图文卡片，在侧栏预览后复制或导出。
 
-当前支持：
+仅支持桌面端，最低需要 Obsidian 1.7.2。免费使用，无需登录。
 
-- 微信公众号：Markdown 转可粘贴的公众号排版 HTML
-- X Articles：长文正文复制 + 图片素材 ZIP
-- 小红书：3:4 图文卡片预览、分页、下载与批量导出
+Jacky-mdflow is a desktop plugin that formats Markdown notes for WeChat Official Accounts, X Articles, and Xiaohongshu.
 
-兼容说明：插件 id 和安装目录仍保留 `mdflow-publisher`，避免影响已经安装的用户；显示名称为 `Jacky-mdflow`。
+## 支持的平台
 
-## English overview
+- **微信公众号**：14 套排版主题，支持标题、重点标记、引用、代码和图片说明，复制后粘贴到公众号编辑器。
+- **X Articles**：复制长文正文，保留图片位置，另行导出图片素材 ZIP。
+- **小红书**：生成 3:4 图文卡片，支持模板、字体、字号、头像、分页及单页或批量导出。
 
-Jacky-mdflow is an Obsidian desktop plugin for turning Markdown notes into publish-ready content for multiple platforms.
+## 开始使用
 
-- WeChat Official Accounts: converts Markdown into styled HTML that can be pasted into the WeChat editor.
-- X Articles: copies long-form text with numbered image placeholders and exports the related images as a ZIP archive.
-- RedNote (Xiaohongshu): creates paginated 3:4 content cards and exports individual images or a complete ZIP archive.
+1. 打开要发布的 Markdown 笔记。
+2. 点击左侧 Jacky-mdflow 图标，或在命令面板运行「Jacky-mdflow：打开内容分发面板」。
+3. 在侧栏选择平台和主题，查看预览。
+4. 公众号直接复制正文；X Articles 复制正文并按图片占位符补图；小红书下载当前页或导出全部页。
 
-The plugin does not require an account, collect telemetry, or upload notes to the author's server. Network requests are only made when a note contains external images that need to be rendered or exported.
+小红书可选「二级标题分页」或「正文卡片流」，用 `---` 手动换页。更多示例见 [详细用法](https://github.com/Jackywxsz/Jacky-mdflow/blob/main/docs/USAGE.md)。
 
-## 当前能力
+## 使用提示
 
-### 微信公众号
+- 公众号正文不额外叠加左右边距；「暖橙」主题使用橙色标题和圆角配图，不自动添加章节编号。
+- 更新前已复制到公众号的草稿，需要重新复制并替换正文，才能应用新版排版。
+- X Articles 的图片需单独上传；下载失败的素材会列在 ZIP 中的 `FAILED_IMAGES.txt`。
+- 小红书自动分页可能需要手动微调，超长图片、代码或表格可用 `---` 调整。
+- 外链图片可能受图床限制，建议优先使用 Vault 内的本地图片。
 
-- Markdown 转公众号可粘贴 HTML
-- 内置“增强主题”和“经典主题”两组公众号排版主题
-- 增强主题包含摸鱼绿、红白编辑、石墨极简、留白禅意、摸鱼票据、橄榄手记
-- 新增「橙色阅读」：参考 APPSO 公开文章的橙色小标题、15px 灰黑正文、1.8 倍行高、26px 段距及圆角配图；不自动添加章节编号，也不叠加正文左右边距
-- 支持章节自动编号、开头引言、主题化引用/提示/列表/表格/代码块/图片说明
-- 支持 `**加粗**`、`==高亮==`、`<u>下划线</u>`、`++下划线++` 等公众号强调语义
-- 预览与复制共用同一份公众号兼容 HTML，减少粘贴后的样式偏差
-- 正文不额外叠加左右留白，适配公众号阅读区；预览保留一层阅读边距，引用与提示卡片保留内部间距
-- 图片自动转 Base64，复制后可直接粘贴到公众号编辑器
-- 使用 Obsidian 原生 `MarkdownRenderer`，兼容内部图片、任务列表、嵌入等常见写法
+## 隐私与联网
 
-### X Articles
+- 不收集遥测数据，不将笔记上传到作者服务器。
+- 笔记含有外链图片时，会请求该图片地址，用于预览、复制和导出；排版不依赖远程服务。
+- 读取当前 Vault 的笔记和图片。主动选择头像或封面时，会读取所选图片，其数据保存在当前 Vault 的插件配置中。
+- 「关于作者」和下方个人站链接是静态推广入口，不自动加载远程广告；点击后由浏览器打开。
 
-- 生成适合直接粘贴到 X Articles 的长文内容
-- 保留段落、标题、列表等基础结构
-- 自动识别文章图片，在正文里生成 `【插入图片 01：文件名】` 占位符
-- 导出图片素材 ZIP，方便按占位符顺序上传到 X
+## 最近更新
 
-### 小红书
+### 1.5.1 · 2026-10-03
 
-- 3:4 图文卡片预览与导出
-- 支持 `二级标题分页` 和 `正文卡片流` 两种排版模式
-- `二级标题分页`：按 `##` 拆成不同内容组，适合主题明确的章节卡片
-- `正文卡片流`：不按二级标题强制分页，正文连续排满卡片，第一页直接展示内容
-- 仅 `Jacky 模板` 在 `二级标题分页` 模式下带封面页
-- 内置默认主题、赛博橙式、赛博薄荷、冷灰橙调等卡片主题
-- 支持模板、字体、字号、头像、封面等设置
-- 支持下载当前页、批量导出全部页 ZIP
-- 自动测量内容高度，尽量减少大面积空白、跳页和内容裁切
+- 精简插件说明，安装和开发文档移至仓库，更多资源统一链接到个人站。
+- 将公众号主题「橙色阅读」更名为「暖橙」，保留原有排版。
 
-## 安装
+### 1.5.0 · 2026-10-03
 
-### Obsidian 第三方插件市场
+- 减少公众号正文两侧的额外留白，复制后的阅读区更宽。
+- 新增橙色标题、灰黑正文和圆角配图的公众号主题。
+- 补充公众号排版所参考的 Skill 来源与许可致谢。
 
-审核通过后，可在 Obsidian 中打开 `设置 -> 第三方插件 -> 浏览`，搜索 `Jacky-mdflow` 并安装。
+完整历史见 [更新日志](https://github.com/Jackywxsz/Jacky-mdflow/blob/main/CHANGELOG.md)。
 
-### 手动安装
+## 更多资源与反馈
 
-1. 前往 [Releases](https://github.com/Jackywxsz/Jacky-mdflow/releases) 下载最新版发布包。
-2. 下载或解压后，把 `main.js`、`styles.css`、`manifest.json` 这 3 个文件放到你的 Vault 插件目录：
+- [Jacky 无限生长 · 个人站](https://www.jackywxsz.club/)
+- [问题反馈与功能建议](https://github.com/Jackywxsz/Jacky-mdflow/issues)
+- [安装与开发文档](https://github.com/Jackywxsz/Jacky-mdflow/tree/main/docs)
 
-```text
-.obsidian/plugins/mdflow-publisher/
-```
+## 许可与致谢
 
-3. 重启 Obsidian，或关闭再启用 `Jacky-mdflow` 插件。
-4. 在 `设置 -> 第三方插件` 中启用 `Jacky-mdflow`。
+代码以 [AGPL-3.0](https://github.com/Jackywxsz/Jacky-mdflow/blob/main/LICENSE) 授权。
 
-### 从源码运行
+公众号的六套增强主题及部分 HTML 兼容处理，参考并适配自 [gzh-design-skill](https://github.com/isjiamu/gzh-design-skill)。感谢甲木 × 摸鱼小李共建的排版设计与主题组件库，保留原项目的 AGPL-3.0 © 2026 甲木 × 摸鱼小李版权声明。
 
-```bash
-git clone https://github.com/Jackywxsz/Jacky-mdflow.git
-cd Jacky-mdflow
-npm install
-npm run dev
-```
-
-开发模式会把构建产物写入本机配置的 Obsidian 插件目录。直接构建发布包可运行：
-
-```bash
-npm run build
-```
-
-## 使用方式
-
-1. 在 Obsidian 中打开一个 Markdown 文件。
-2. 点击左侧边栏图标，打开右侧 `Jacky-mdflow` 面板。
-3. 在顶部选择目标平台：微信公众号、X Articles 或小红书。
-4. 根据平台复制或导出。
-
-平台导出方式：
-
-- 微信公众号：点击复制后，直接粘贴到公众号编辑器。
-- X Articles：复制正文后粘贴到 X，按 `【插入图片 xx】` 占位符上传导出的图片素材。
-- 小红书：选择模板、排版、字体和字号后，下载当前页或导出全部页 ZIP。
-
-## 小红书使用说明
-
-小红书有两种排版模式，可以在顶部工具栏的「排版」里切换。
-
-### 二级标题分页
-
-适合一组卡片围绕不同章节展开。
-
-- `##` 二级标题：作为一个分节标题，也会显示在图片上方
-- `---` 分页符：在当前分节内强制换页
-- `###` 三级标题：只作为正文小标题，不负责分节
-- 如果没有写 `---`，插件会根据内容长度、图片、代码块、列表等自动分页
-
-推荐写法：
-
-```md
-## 这是这一组卡片的标题
-
-开头说明文字。
-
----
-
-![图片](your-image.png)
-
-这一页继续讲图片对应的内容。
-
-### 这是正文子标题
-
-补充说明。
-```
-
-### 正文卡片流
-
-适合从 Obsidian 笔记直接生成小红书图文。
-
-- 不会因为每个 `##` 都强制换页
-- `##`、`###` 会作为正文里的小标题显示
-- 第一页直接进入正文内容，不额外生成封面
-- 文字会尽量排满当前卡片
-- 遇到较大的图片、表格、代码块或手动 `---` 时，会换到下一页
-
-推荐写法：
-
-```md
-# 文章标题
-
-第一段直接进入正文。
-
-## 一个正文小标题
-
-继续展开内容，插件会按卡片高度自动分页。
-
-![图片](your-image.png)
-
-图片之后的内容会根据剩余空间继续排版。
-```
-
-## X Articles 图片规则
-
-X 不能像公众号一样稳定接收剪贴板里的本地图片，所以插件采用更稳的方式：
-
-1. 正文复制时保留图片位置，自动写成 `【插入图片 01：文件名】`。
-2. 同时导出图片素材 ZIP。
-3. 发布到 X Articles 时，按占位符顺序把图片上传到对应位置。
-
-如果图片下载失败，ZIP 里会带 `FAILED_IMAGES.txt`，可以根据里面的路径手动补图。
-
-## 更新日志
-
-### 2026-07-10 / v1.2.0
-
-- 准备 Obsidian 第三方插件市场发布所需的版本元数据与自动化 Release。
-- 新增官方 Obsidian ESLint 规则检查，并修复插件生命周期、命令名称、设置页标题和预览 DOM 安全问题。
-- 最低支持版本调整为 Obsidian 1.7.2，与实际使用的 API 保持一致。
-
-### 2026-06-29
-
-- 小红书新增「排版」选择。
-- 保留原有 `二级标题分页` 模式，默认行为不变。
-- 新增 `正文卡片流` 模式，二级标题作为正文小标题，不再强制每个二级标题分页。
-- `正文卡片流` 第一页直接展示正文内容，不额外生成封面。
-
-### 2026-06-27 / v1.1.0
-
-- X Articles 支持图片占位符和图片素材 ZIP 导出，解决长文里图片难以同步的问题。
-- 修复 X Articles 部分图片被漏掉的问题，导出时会尽量保留本地图片、外链图片和 Base64 图片。
-- 小红书新增 `赛博橙式` 主题，适配 Jacky 品牌橙色。
-- 小红书移除部分不常用主题，让主题列表更干净。
-- 优化小红书分页和内容测量逻辑，减少跳页、底部大面积空白和内容裁切。
-- 修复小红书切换文章时预览偶发滞后的问题。
-
-### 2026-05-29
-
-- 小红书新增 `暗橙风格`、`亮绿风格`、`冷灰橙调` 3 个模板。
-- 暗色模板下载图片时不再变成白底，白色文字可以正常显示。
-- 模板下拉顺序调整为 `Jacky 模板`、`默认主题` 优先。
-- 加粗、强调和高亮文字会跟随当前模板的重点色。
-
-## 已知限制
-
-- 当前仅支持桌面端 Obsidian，`manifest.json` 中为 `isDesktopOnly: true`
-- 小红书自动分页仍然是启发式规则，不是像素级排版引擎
-- 长图、超长代码块、超长表格仍可能需要手动插入 `---` 微调
-- 极少数外链图片图床可能不稳定，建议优先使用 Obsidian 本地图片或稳定 CDN
-- 小红书目前更适合图文卡片导出，不是所见即所得设计器
-
-## 隐私、联网与推广说明
-
-- 插件不要求登录或付费，不收集遥测数据，也不会把笔记内容上传到作者服务器。
-- 只有当当前笔记包含 `http://` 或 `https://` 外链图片时，插件才会请求对应图片地址，用于预览、复制或导出；不会请求与当前内容无关的远程服务。
-- 插件默认只读取当前 Obsidian Vault 中的笔记和图片。只有在用户主动选择头像或封面时，才会读取所选图片，并把图片数据保存在该 Vault 的插件配置中。
-- 插件内「关于作者」页面包含作者简介、个人频道、同名社交账号和微信联系方式；README 的「更多资源」包含作者课程链接。这些都是静态信息，不会从远程广告服务动态加载。
-
-## 更多资源
-
-如果你想系统学习 AI 内容创作、工作流搭建和工具化思路，可以看我的知识库与答疑群介绍：
-
-[创作者 AI 课：用 AI 杠杆、代码杠杆、媒体杠杆，重塑内容创作生产体系](https://mp.weixin.qq.com/s/x924y3O9-nWda5OTHArKKg)
-
-<img src="assets/creator-ai-course-qr.png" alt="Jacky 创作者 AI 俱乐部课程二维码" width="360">
-
-## 开发
-
-```bash
-npm install
-npm run dev
-npm run build
-```
-
-如果你想直接部署到本地 Vault：
-
-```bash
-export OBSIDIAN_VAULT_PATH="/path/to/your/vault"
-npm run deploy
-```
-
-部署后，在 Obsidian 中重载插件并打开 Jacky-mdflow 面板，再运行 `npm run test:wechat`。此检查在已安装插件的真实 DOM 中验证正文宽度、主题编号与橙色阅读样式，不修改笔记；多个 Vault 同时打开时可用 `npm run test:wechat -- --vault="你的 Vault 名称"` 指定目标。
-
-## 技术栈
-
-- TypeScript
-- Obsidian API
-- Obsidian `MarkdownRenderer`
-- `html-to-image`
-- `jszip`
-
-## 第三方许可
-
-- 微信公众号的六套增强主题（摸鱼绿、红白编辑、石墨极简、留白禅意、摸鱼票据、橄榄手记）与部分 HTML 兼容处理，参考并适配自 [gzh-design-skill](https://github.com/isjiamu/gzh-design-skill)。感谢 **甲木 × 摸鱼小李** 联名共建的主题组件库、排版设计与质量校验标准。原项目版权声明为 **AGPL-3.0 © 2026 甲木 × 摸鱼小李**，详见其 [README](https://github.com/isjiamu/gzh-design-skill#-致谢) 与 [LICENSE](https://github.com/isjiamu/gzh-design-skill/blob/main/LICENSE)。本插件针对 Obsidian 的 Markdown 渲染、预览、剪贴板及公众号阅读宽度进行了适配。
-- 「橙色阅读」的视觉参考来自 [APPSO 的公开文章](https://mp.weixin.qq.com/s/AkMSR8MnOvSSY_3N6jVO0A)（2026-10-03 核验）。它是本插件重新实现的阅读主题，提炼字体层级、段落节奏、橙色标题及圆角图片；引用、列表、表格和代码样式为插件补充的适配设计。
-- [`html-to-image`](https://github.com/bubkoo/html-to-image/blob/master/LICENSE) — MIT License，Copyright (c) 2017-2025 W.Y.
-- [`JSZip`](https://github.com/Stuk/jszip/blob/main/LICENSE.markdown) — 本项目按 MIT License 使用，Copyright (c) 2009-2016 Stuart Knightley、David Duponchel、Franz Buchinger、António Afonso。
-
-## License
-
-Jacky-mdflow 的代码以 [GNU Affero General Public License v3.0](LICENSE) 授权。
+其他依赖：[html-to-image](https://github.com/bubkoo/html-to-image/blob/master/LICENSE)（MIT，© 2017-2025 W.Y.）、[JSZip](https://github.com/Stuk/jszip/blob/main/LICENSE.markdown)（MIT，© 2009-2016 Stuart Knightley、David Duponchel、Franz Buchinger、António Afonso）。

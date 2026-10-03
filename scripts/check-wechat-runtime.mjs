@@ -43,10 +43,11 @@ async function checkRuntime() {
       }
       const heading = outer.querySelector('h2');
       if (id === 'wechat-orange-reading') {
-        require(heading.textContent === '阅读宽度检查', '橙色阅读不应自动添加章节编号。');
+        require(manager.getCurrentTheme().name === '暖橙', '暖橙主题名称未更新。');
+        require(heading.textContent === '阅读宽度检查', '暖橙不应自动添加章节编号。');
         require(getComputedStyle(heading).color === 'rgb(253, 70, 6)', '橙色标题颜色丢失。');
-        require(getComputedStyle(paragraph).fontSize === '15px', '橙色阅读正文不是 15px。');
-        require(getComputedStyle(paragraph).lineHeight === '27px', '橙色阅读行高不是 27px。');
+        require(getComputedStyle(paragraph).fontSize === '15px', '暖橙正文不是 15px。');
+        require(getComputedStyle(paragraph).lineHeight === '27px', '暖橙行高不是 27px。');
         require(paragraph.querySelector('u'), '++下划线++ 未转换。');
         require(getComputedStyle(outer.querySelector('img')).borderRadius === '11px', '图片圆角丢失。');
         require(outer.textContent.includes('测试图片说明'), '图片说明遗漏。');
@@ -55,7 +56,7 @@ async function checkRuntime() {
       }
       require(!doc.querySelector('div, style, script, [class], [id]'), `${id}：复制 HTML 存在不兼容标签或属性。`);
     }
-    require(themes.includes('wechat-orange-reading'), '已安装插件缺少橙色阅读主题。');
+    require(themes.includes('wechat-orange-reading'), '已安装插件缺少暖橙主题。');
     return { ok: true, themes: themes.length, widthCases, installedRuntime: true };
   } finally {
     host.remove();
